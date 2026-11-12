@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cộng – Sơ đồ quy trình liên phòng ban</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E9EFF7; --surface:#F6F9FD; --lane-a:#F3F7FC; --lane-b:#EAF0F8; --rule:#C9D5E6;
+  --navy:#132F5C; --navy-2:#1E4380; --ink:#14223B; --muted:#5A6B86;
+  --lab:#D5E1F2; --lab-ink:#16315C;
+  --node:#FFFFFF; --node-bd:#97A9C6; --appr:#FFE48F; --appr-bd:#D9AE24; --appr-ink:#3E3000;
+  --out:#A9DE84; --out-bd:#5DA637; --out-ink:#173A08; --dec:#1D3F7A; --dec-ink:#FFFFFF;
+  --edge:#3B4E70; --edge-lb:#F6F9FD; --badge:#E3EAF5; --badge-ink:#2B4775;
+  --focus:#2E6BD8; --shadow:0 1px 2px rgba(19,47,92,.12);
+  color-scheme: light;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1524; --surface:#121D31; --lane-a:#121C2F; --lane-b:#16223A; --rule:#2A3A57;
+    --navy:#2A5296; --navy-2:#3563B3; --ink:#E4ECF8; --muted:#9AAAC4;
+    --lab:#1B2A46; --lab-ink:#CFDDF3;
+    --node:#1A2740; --node-bd:#4A5F84; --appr:#5A4810; --appr-bd:#D3A72A; --appr-ink:#FFF0BF;
+    --out:#244A19; --out-bd:#68B342; --out-ink:#DDF4CE; --dec:#3A66B4; --dec-ink:#FFFFFF;
+    --edge:#93A7CB; --edge-lb:#121D31; --badge:#24365A; --badge-ink:#C6D6F2;
+    --focus:#7FA8F0; --shadow:none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+    --bg:#0D1524; --surface:#121D31; --lane-a:#121C2F; --lane-b:#16223A; --rule:#2A3A57;
+    --navy:#2A5296; --navy-2:#3563B3; --ink:#E4ECF8; --muted:#9AAAC4;
+    --lab:#1B2A46; --lab-ink:#CFDDF3;
+    --node:#1A2740; --node-bd:#4A5F84; --appr:#5A4810; --appr-bd:#D3A72A; --appr-ink:#FFF0BF;
+    --out:#244A19; --out-bd:#68B342; --out-ink:#DDF4CE; --dec:#3A66B4; --dec-ink:#FFFFFF;
+    --edge:#93A7CB; --edge-lb:#121D31; --badge:#24365A; --badge-ink:#C6D6F2;
+    --focus:#7FA8F0; --shadow:none; color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Be Vietnam Pro",Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+header.top{display:flex;gap:16px;align-items:center;justify-content:space-between;padding:10px 16px 8px;flex-wrap:wrap}
+.ttl{border-left:5px solid var(--navy);padding-left:12px;min-width:280px;flex:1}
+.ttl h1{margin:0;font-size:18px;line-height:1.25;font-weight:800;color:var(--navy);letter-spacing:.1px}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .ttl h1{color:var(--ink)}}
+:root[data-theme="dark"] .ttl h1{color:var(--ink)}
+.ttl p{margin:3px 0 0;font-size:12px;color:var(--muted);max-width:110ch}
+.legend{display:flex;align-items:stretch;border:1px solid var(--rule);border-radius:10px;background:var(--surface);overflow:hidden;font-size:10.5px;color:var(--ink)}
+.legend .lh{background:var(--navy);color:#fff;font-weight:700;padding:8px 12px;display:flex;align-items:center;text-align:center;line-height:1.25}
+.legend .li{display:flex;align-items:center;gap:7px;padding:6px 11px;border-left:1px solid var(--rule)}
+.legend .li:first-of-type{border-left:0}
+.sw{width:24px;height:15px;border-radius:4px;border:1px solid var(--node-bd);background:var(--node);flex:none}
+.sw.a{background:var(--appr);border-color:var(--appr-bd)} .sw.o{background:var(--out);border-color:var(--out-bd)}
+.sw.d{width:13px;height:13px;border:0;background:var(--dec);transform:rotate(45deg);border-radius:2px;margin:0 4px}
+.sw.ln{border:0;background:none;height:2px;border-top:2px solid var(--edge);border-radius:0;width:26px}
+.sw.ln.ds{border-top-style:dashed}
+.toolbar{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:15;display:flex;gap:6px;align-items:center;padding:6px 8px;font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--rule);border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.12)}
+.toolbar button{font:inherit;font-size:12px;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:7px;padding:5px 10px;cursor:pointer}
+.toolbar button:hover{border-color:var(--navy-2)}
+.toolbar button:focus-visible,.node:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.toolbar .hint{margin:0 4px;min-width:34px;text-align:right}
+.scroller{flex:1;overflow:auto;position:relative;border-top:1px solid var(--rule)}
+.board{display:flex;width:max-content;position:relative}
+.lanecol{position:sticky;left:0;z-index:5;background:var(--bg);flex:none;padding-left:8px}
+.lanehead{display:flex;align-items:center;justify-content:center;text-align:center;background:var(--navy);color:#fff;font-weight:700;font-size:12px;border-radius:8px;margin:8px 0 6px;line-height:1.25}
+.lab{display:flex;flex-direction:column;justify-content:center;background:var(--lab);color:var(--lab-ink);border-radius:8px;padding:6px 10px;margin-bottom:0;border-bottom:3px solid var(--bg)}
+.lab b{font-size:13px;font-weight:700;line-height:1.2}
+.lab span{font-size:10px;color:var(--muted);line-height:1.25;margin-top:2px}
+.canvas{position:relative;flex:none}
+.chev{position:absolute;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;background:var(--navy);clip-path:polygon(0 0,calc(100% - 16px) 0,100% 50%,calc(100% - 16px) 100%,0 100%,14px 50%)}
+.chev:first-child{clip-path:polygon(0 0,calc(100% - 16px) 0,100% 50%,calc(100% - 16px) 100%,0 100%)}
+.band{position:absolute;left:0}
+.coldiv{position:absolute;width:0;border-left:1.5px dashed var(--rule)}
+svg.edges{position:absolute;left:0;top:0;pointer-events:none;overflow:visible}
+svg.edges path{fill:none;stroke:var(--edge);stroke-width:1.4;stroke-linejoin:round}
+svg.edges path.ds{stroke-dasharray:5 4}
+svg.edges .elb rect{fill:var(--edge-lb);stroke:none}
+svg.edges .elb text{font-size:9.5px;fill:var(--muted);font-weight:600;font-family:inherit}
+svg.edges .elb.opt{display:none}
+svg.edges path.e{transition:opacity .12s}
+svg.edges.hl path.e{opacity:.1}
+svg.edges.hl path.e.on{opacity:1;stroke:var(--focus);stroke-width:2.2}
+svg.edges.hl .elb{opacity:.12}
+svg.edges.hl .elb.on{opacity:1;display:inline}
+svg.edges.hl .elb.on text{fill:var(--focus)}
+.node{transition:opacity .12s}
+.node.dim{opacity:.3}
+.toolbar button[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+@media (prefers-reduced-motion: reduce){svg.edges path.e,.node{transition:none}}
+.node{position:absolute;display:flex;flex-direction:column;justify-content:center;text-align:center;padding:7px 8px 7px;min-height:44px;border-radius:8px;border:1.3px solid var(--node-bd);background:var(--node);color:var(--ink);box-shadow:var(--shadow);cursor:pointer;font:inherit}
+.node .t{font-size:11px;font-weight:700;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.node .s{font-size:9.5px;line-height:1.3;color:var(--muted);margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.node.a{background:var(--appr);border-color:var(--appr-bd);color:var(--appr-ink)} .node.a .s{color:inherit;opacity:.8}
+.node.o{background:var(--out);border-color:var(--out-bd);color:var(--out-ink)} .node.o .s{color:inherit;opacity:.8}
+.node.d{background:none;border:0;box-shadow:none;padding:0}
+.node.d::before{content:"";position:absolute;left:50%;top:50%;width:46px;height:46px;background:var(--dec);transform:translate(-50%,-50%) rotate(45deg);border-radius:5px}
+.node.d .t{position:relative;color:var(--dec-ink);font-size:9.5px;max-width:58px;margin:0 auto;line-height:1.15}
+.node .bd{position:absolute;top:-8px;right:6px;font-size:8.5px;font-weight:700;background:var(--badge);color:var(--badge-ink);border-radius:999px;padding:1px 6px;border:1px solid var(--rule);white-space:nowrap}
+.node.d .bd{top:-6px;right:-8px}
+.node:hover{border-color:var(--navy-2)}
+.node.sel{outline:2.5px solid var(--focus);outline-offset:2px}
+/* drawer */
+.drawer{position:fixed;top:0;right:0;height:100%;width:min(460px,100%);background:var(--surface);border-left:1px solid var(--rule);box-shadow:-8px 0 24px rgba(0,0,0,.15);transform:translateX(102%);transition:transform .22s ease;z-index:20;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.drawer.on{transform:none}
+.dh{padding:16px 18px 12px;border-bottom:1px solid var(--rule);display:flex;gap:10px;align-items:flex-start}
+.dh .k{font-size:11px;color:var(--muted)}
+.dh h2{margin:3px 0 0;font-size:17px;line-height:1.3}
+.dh button{margin-left:auto;font:inherit;font-size:12px;border:1px solid var(--rule);background:var(--bg);color:var(--ink);border-radius:7px;padding:5px 10px;cursor:pointer}
+.db{overflow:auto;padding:12px 18px 24px}
+.step{border:1px solid var(--rule);border-radius:10px;padding:11px 13px;margin-bottom:10px;background:var(--bg)}
+.step .sh{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.step .no{font-weight:800;color:var(--navy-2);font-size:12px;white-space:nowrap}
+.step .gp{font-size:11px;color:var(--muted)}
+.step h3{margin:4px 0 8px;font-size:14px;line-height:1.35;white-space:pre-line}
+.kv{display:grid;grid-template-columns:96px 1fr;gap:5px 10px;font-size:12px;line-height:1.45}
+.kv dt{color:var(--muted)} .kv dd{margin:0;white-space:pre-line}
+.note{font-size:12px;color:var(--muted);padding:4px 0 10px}
+@media (prefers-reduced-motion: reduce){.drawer{transition:none}}
+/* báo cáo Power BI gắn vào bước */
+.rpbar{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:0 16px 8px;font-size:11.5px;color:var(--muted)}
+.rpbar .rh{font-weight:700;color:var(--ink);margin-right:2px}
+.rpc{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:11.5px;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:999px;padding:3px 10px 3px 4px;cursor:pointer}
+.rpc:hover{border-color:var(--navy-2)}
+.rpc[aria-pressed="true"]{border-color:var(--focus);box-shadow:0 0 0 2px var(--focus) inset}
+.rpc .n{font-size:10px;color:var(--muted)}
+.rpbar .gap{margin-left:6px;font-size:11px}
+.rk{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:16px;padding:0 4px;border-radius:4px;font-size:9px;font-weight:800;color:#fff;letter-spacing:.2px;flex:none}
+.node .rps{position:absolute;bottom:-8px;left:6px;display:flex;gap:2px}
+.node .rps .rk{height:13px;min-width:18px;font-size:8px;border:1px solid var(--surface)}
+.node.d .rps{bottom:-4px;left:-6px}
+.node.rdim{opacity:.18}
+.node.rhit{box-shadow:0 0 0 3px var(--focus)}
+.rpsec{border:1px solid var(--rule);border-radius:10px;padding:10px 12px;margin-bottom:12px;background:var(--surface)}
+.rpsec h4{margin:0 0 8px;font-size:12px;color:var(--navy-2);text-transform:uppercase;letter-spacing:.3px}
+.rpi{display:grid;grid-template-columns:auto 1fr;gap:3px 9px;align-items:start;padding:6px 0;border-top:1px dashed var(--rule);font-size:12px;line-height:1.45}
+.rpi:first-of-type{border-top:0}
+.rpi a{color:var(--focus);font-weight:700;text-decoration:none}
+.rpi a:hover{text-decoration:underline}
+.rpi .x{grid-column:2;color:var(--muted)}
+/* chọn nhiều báo cáo + chế độ độ phủ */
+.rpbar .act{font:inherit;font-size:11.5px;font-weight:700;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:7px;padding:4px 10px;cursor:pointer}
+.rpbar .act:hover{border-color:var(--navy-2)}
+.rpbar .act[aria-pressed="true"]{background:var(--navy);color:#fff;border-color:var(--navy)}
+.rpbar .sep{width:1px;height:18px;background:var(--rule);margin:0 4px}
+.node.cv0{outline:2px dashed #D23B3B;outline-offset:2px}
+.node.cvn{outline:2.5px solid #E08A00;outline-offset:2px}
+.node.cvx{opacity:.45}
+.node .cvt{position:absolute;top:-9px;left:6px;font-size:8.5px;font-weight:800;border-radius:999px;padding:1px 6px;color:#fff;white-space:nowrap;display:none}
+.node.cv0 .cvt{display:block;background:#D23B3B}
+.node.cvn .cvt{display:block;background:#E08A00}
+.cvleg{display:none;gap:10px;align-items:center;font-size:11px;color:var(--muted)}
+.cvleg.on{display:inline-flex}
+.cvleg i{display:inline-block;width:14px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+table.th{width:100%;border-collapse:collapse;font-size:11.5px;margin:4px 0 14px}
+table.th th,table.th td{border-bottom:1px solid var(--rule);padding:5px 6px;text-align:left;vertical-align:top}
+table.th th{color:var(--muted);font-weight:700;font-size:10.5px;text-transform:uppercase}
+table.th td.n{text-align:right;white-space:nowrap}
+.bad{color:#D23B3B;font-weight:700}.warn{color:#E08A00;font-weight:700}
+.sub{font-size:11px;color:var(--muted)}
+.rpsec ul{margin:4px 0 0;padding-left:18px;font-size:12px;line-height:1.5}
+/* tab: sơ đồ / đề xuất */
+.tabs{display:flex;gap:4px;padding:0 16px;border-bottom:1px solid var(--rule)}
+.tabs button{font:inherit;font-size:12.5px;font-weight:700;color:var(--muted);background:none;border:0;border-bottom:3px solid transparent;padding:8px 12px 7px;cursor:pointer}
+.tabs button[aria-selected="true"]{color:var(--navy-2);border-bottom-color:var(--navy-2)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--focus)}}
+:root[data-theme="dark"] .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--focus)}
+body.dx .rpbar,body.dx .scroller,body.dx .toolbar{display:none}
+.dxv{display:none;flex:1;overflow:auto;padding:16px 16px 40px}
+body.dx .dxv{display:block}
+.dxv h2{font-size:15px;margin:4px 0 4px;color:var(--navy-2)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .dxv h2{color:var(--ink)}}
+:root[data-theme="dark"] .dxv h2{color:var(--ink)}
+.dxv .lead{font-size:12px;color:var(--muted);margin:0 0 12px;max-width:120ch}
+.dxg{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px;margin-bottom:22px}
+.dxc{border:1px solid var(--rule);border-radius:10px;background:var(--surface);padding:11px 13px;display:flex;flex-direction:column;gap:6px;font-size:12px;line-height:1.5}
+.dxc .hd{display:flex;align-items:center;gap:7px;font-weight:700;font-size:13px}
+.dxc .tag{margin-left:auto;font-size:10.5px;font-weight:800;border-radius:999px;padding:2px 9px;white-space:nowrap;color:#fff}
+.tag.giu{background:#2F7D32}.tag.gop{background:#C25E00}.tag.gon{background:#B08800}.tag.cao{background:#C62828}.tag.tb{background:#C25E00}.tag.thap{background:#5B6B86}
+.dxc dl{display:grid;grid-template-columns:78px 1fr;gap:3px 8px;margin:0}
+.dxc dt{color:var(--muted)} .dxc dd{margin:0}
+.dxc .go{align-self:flex-start;font:inherit;font-size:11px;font-weight:700;color:var(--focus);background:none;border:1px solid var(--rule);border-radius:7px;padding:3px 9px;cursor:pointer;margin-top:2px}
+.dxc .go:hover{border-color:var(--focus)}
+.dxnote{font-size:11.5px;color:var(--muted);border-left:3px solid var(--rule);padding:4px 10px;margin:0 0 18px;max-width:120ch}
+/* cố định hàng tiêu đề nghiệp vụ + ô góc khi cuộn dọc */
+.colhead{position:sticky;top:0;z-index:4;background:var(--bg)}
+.lanehead{position:sticky;top:8px;z-index:7;box-shadow:0 -8px 0 var(--bg),0 6px 0 var(--bg)}
+/* kéo màn hình bằng chuột */
+.scroller{cursor:grab}
+.scroller.keo{cursor:grabbing;user-select:none}
+.scroller .node{cursor:pointer}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="ttl">
+    <h1>CỘNG – Sơ đồ value chain / quy trình liên phòng ban theo từng mảng nghiệp vụ</h1>
+    <p>Phòng ban tham gia và bàn giao giữa các bộ phận trong 6 mảng nghiệp vụ chính. Số trên mỗi ô là số bước trong bộ quy trình gốc (TH = trường hợp); rê chuột vào ô để làm nổi bật mũi tên liên quan, bấm để xem chi tiết.</p>
+  </div>
+  <div class="legend" aria-label="Chú giải">
+    <div class="lh">Chú giải</div>
+    <div class="li"><span class="sw"></span>Bước xử lý</div>
+    <div class="li"><span class="sw d"></span>Điểm quyết định</div>
+    <div class="li"><span class="sw a"></span>Phê duyệt</div>
+    <div class="li"><span class="sw o"></span>Đầu ra / Kết quả</div>
+    <div class="li"><span class="sw ln"></span>Luồng chính</div>
+    <div class="li"><span class="sw ln ds"></span>Phối hợp / Phản hồi</div>
+  </div>
+</header>
+<nav class="tabs" role="tablist" aria-label="Chế độ xem">
+  <button type="button" role="tab" id="tab-sodo" aria-selected="true">Sơ đồ value chain</button>
+  <button type="button" role="tab" id="tab-dx" aria-selected="false">Đề xuất báo cáo</button>
+</nav>
+<div class="rpbar" id="rpbar" aria-label="Báo cáo Power BI"><span class="rh">Báo cáo:</span></div>
+<section class="dxv" id="dxv" aria-label="Đề xuất báo cáo"></section>
+<div class="toolbar">
+  <button id="tgd" type="button" aria-pressed="false">Hiện luồng phối hợp</button>
+  <button id="zfit" type="button">Vừa màn hình</button>
+  <button id="z100" type="button">100%</button>
+  <button id="zout" type="button" aria-label="Thu nhỏ">−</button>
+  <button id="zin" type="button" aria-label="Phóng to">+</button>
+  <span id="zlab" class="hint"></span>
+</div>
+<div class="scroller" id="sc">
+  <div class="board" id="board">
+    <div class="lanecol" id="lanecol"></div>
+    <div class="canvas" id="cv"></div>
+  </div>
+</div>
+<aside class="drawer" id="dr" aria-hidden="true">
+  <div class="dh"><div><div class="k" id="dk"></div><h2 id="dt"></h2></div><button type="button" id="dx">Đóng</button></div>
+  <div class="db" id="db"></div>
+</aside>
+<script>
+const LANES=[["pttt", "PTTT", "Phát triển thị trường"], ["tkxd", "TK & XD", "Thiết kế & xây dựng"], ["rnd", "R&D", "Nghiên cứu & phát triển"], ["kdvh", "KDVH", "Kinh doanh vận hành"], ["mkt", "Marketing", "gồm CSKH, Trade MKT"], ["htht", "HTHT / IT", "Hỗ trợ hệ thống"], ["dt", "Đào tạo", ""], ["qa", "QA / QC", "Quản lý & kiểm soát chất lượng"], ["cwkb", "CWKB", "Cung ứng NVL, nội thất, KD"], ["ns", "NS / Kế toán", "Nhân sự, Kế toán"], ["ch", "Cửa hàng / CĐT", ""]], COLS=[["A", "Cửa hàng mới"], ["B", "Đồ uống mới"], ["C", "Sản phẩm thương mại"], ["D", "Đánh giá QC"], ["E", "Xử lý khiếu nại"], ["F", "Chương trình khuyến mại"]], NODES=[{"id": "a1", "c": "A", "l": "pttt", "r": 0, "p": "L", "k": "s", "t": "Đánh giá địa điểm & CĐT", "s": "mặt bằng, hạ tầng, đối thủ, tổng đầu tư dự kiến", "refs": ["1"], "ph": ""}, {"id": "a2", "c": "A", "l": "pttt", "r": 0, "p": "R", "k": "a", "t": "CEO phê duyệt địa điểm", "s": "duyệt mới chuyển bước tiếp theo", "refs": ["1"], "ph": ""}, {"id": "a3", "c": "A", "l": "pttt", "r": 1, "p": "L", "k": "s", "t": "Chốt hợp tác & họp dự án", "s": "ký HĐ với CĐT, timeline, dự toán chi phí", "refs": ["3"], "ph": ""}, {"id": "a4", "c": "A", "l": "pttt", "r": 1, "p": "R", "k": "o", "t": "Họp rút kinh nghiệm dự án", "s": "biên bản tổng hợp", "refs": ["37"], "ph": ""}, {"id": "a5", "c": "A", "l": "tkxd", "r": 0, "p": "R", "k": "s", "t": "Khảo sát xây dựng", "s": "dự toán, thời gian khởi công – hoàn thiện", "refs": ["2"], "ph": ""}, {"id": "a6", "c": "A", "l": "tkxd", "r": 0, "p": "L", "k": "s", "t": "Thiết kế & giám sát thi công", "s": "layout, 3D, M&E; DS nội thất → order", "refs": ["4", "5", "20"], "ph": ""}, {"id": "a7", "c": "A", "l": "kdvh", "r": 0, "p": "L", "k": "s", "t": "Định hướng KD & chuẩn bị", "s": "hồ sơ pháp lý CH; DS NVL, CCDC, SPTM → order", "refs": ["8", "11", "13"], "ph": ""}, {"id": "a8", "c": "A", "l": "kdvh", "r": 0, "p": "R", "k": "s", "t": "Định biên nhân sự", "s": "order tuyển dụng; đánh giá sau đào tạo", "refs": ["15", "19"], "ph": ""}, {"id": "a9", "c": "A", "l": "kdvh", "r": 1, "p": "L", "k": "s", "t": "Nhận bàn giao & chạy thử", "s": "bàn giao 3 bên, setup, kiểm tra công năng", "refs": ["23", "24", "25", "26", "27"], "ph": ""}, {"id": "a10", "c": "A", "l": "kdvh", "r": 1, "p": "R", "k": "s", "t": "Huấn luyện & chuyển giao", "s": "ĐTNQ, BQL cửa hàng; bàn giao tài liệu", "refs": ["28", "29", "30"], "ph": ""}, {"id": "a11", "c": "A", "l": "kdvh", "r": 2, "p": "R", "k": "o", "t": "Hỗ trợ khai trương & báo cáo VH", "s": "doanh thu 2 tuần đầu, sổ tay CH", "refs": ["31", "33"], "ph": ""}, {"id": "a12", "c": "A", "l": "mkt", "r": 0, "p": "L", "k": "s", "t": "Kế hoạch MKT & nội dung", "s": "khai trương + 1 tháng; ảnh, video, Maps, FB", "refs": ["9", "10"], "ph": ""}, {"id": "a13", "c": "A", "l": "mkt", "r": 0, "p": "R", "k": "o", "t": "Truyền thông khai trương & báo cáo", "s": "tiếp cận, tương tác; hiệu quả CTKM", "refs": ["32", "34"], "ph": ""}, {"id": "a14", "c": "A", "l": "htht", "r": 0, "p": "L", "k": "s", "t": "Lắp đặt IT & đăng ký đối tác", "s": "internet, camera, iPOS; giao hàng, thanh toán", "refs": ["21", "22"], "ph": ""}, {"id": "a15", "c": "A", "l": "dt", "r": 0, "p": "R", "k": "s", "t": "Kế hoạch & đào tạo nhân sự", "s": "ĐTNQ, NV: tinh thần Cộng, pha chế, phục vụ", "refs": ["7", "18"], "ph": ""}, {"id": "a16", "c": "A", "l": "qa", "r": 0, "p": "L", "k": "s", "t": "Kiểm tra pháp lý NCC NVL", "s": "", "refs": ["12"], "ph": ""}, {"id": "a17", "c": "A", "l": "qa", "r": 0, "p": "R", "k": "o", "t": "Đánh giá chất lượng XD & VH", "s": "gửi báo cáo CEO", "refs": ["35"], "ph": ""}, {"id": "a18", "c": "A", "l": "cwkb", "r": 0, "p": "L", "k": "s", "t": "Sản xuất nội thất & cung ứng NVL", "s": "nhận order, chuẩn bị, bàn giao", "refs": ["6", "14"], "ph": ""}, {"id": "a19", "c": "A", "l": "ns", "r": 0, "p": "L", "k": "s", "t": "Tuyển dụng nhân sự CH", "s": "chốt lương thưởng với CĐT, bàn giao NS", "refs": ["16"], "ph": ""}, {"id": "a20", "c": "A", "l": "ns", "r": 0, "p": "R", "k": "s", "t": "Đào tạo kế toán CH & thưởng dự án", "s": "thưởng KD, thưởng hiệu quả XD", "refs": ["17", "36"], "ph": ""}, {"id": "a21", "c": "A", "l": "ch", "r": 0, "p": "C", "k": "o", "t": "Khai trương cửa hàng", "s": "ĐTNQ, BQL tiếp nhận vận hành", "refs": [], "ph": "Giai đoạn Khai trương (bước 31–32)"}, {"id": "b1", "c": "B", "l": "rnd", "r": 0, "p": "L", "k": "s", "t": "Đề xuất & lập kế hoạch", "s": "RnD hoặc CH/phòng ban có nhu cầu; timeline", "refs": ["1", "2", "3"], "ph": ""}, {"id": "b2", "c": "B", "l": "rnd", "r": 0, "p": "R", "k": "a", "t": "CEO duyệt kế hoạch", "s": "", "refs": ["3"], "ph": ""}, {"id": "b3", "c": "B", "l": "rnd", "r": 1, "p": "R", "k": "s", "t": "Ý tưởng & công thức dự kiến", "s": "", "refs": ["4"], "ph": ""}, {"id": "b4", "c": "B", "l": "rnd", "r": 1, "p": "L", "k": "s", "t": "Thử nếm lần 1–2–3", "s": "đánh giá, điều chỉnh sau mỗi lần", "refs": ["6"], "ph": ""}, {"id": "b5", "c": "B", "l": "rnd", "r": 2, "p": "L", "k": "s", "t": "Họp duyệt, tính giá vốn", "s": "RnD, KDVH, QC, QA, CEO, PGĐ VH", "refs": ["7"], "ph": ""}, {"id": "b6", "c": "B", "l": "rnd", "r": 2, "p": "R", "k": "s", "t": "Hoàn thiện bộ tiêu chuẩn", "s": "bộ tiêu chuẩn pha chế", "refs": ["10"], "ph": ""}, {"id": "b7", "c": "B", "l": "rnd", "r": 3, "p": "R", "k": "a", "t": "QA đối chiếu & CEO phê duyệt", "s": "hồ sơ nghiên cứu vs bộ tiêu chuẩn", "refs": ["11", "12"], "ph": ""}, {"id": "b8", "c": "B", "l": "rnd", "r": 3, "p": "L", "k": "s", "t": "Gửi thông tin chốt", "s": "giá vốn, giá bán, công thức, tài liệu SP", "refs": ["13"], "ph": ""}, {"id": "b9", "c": "B", "l": "cwkb", "r": 0, "p": "L", "k": "s", "t": "Chuẩn bị nguồn cung", "s": "NVL, CCDC sử dụng", "refs": ["5"], "ph": ""}, {"id": "b10", "c": "B", "l": "qa", "r": 0, "p": "R", "k": "s", "t": "Hồ sơ pháp lý NVL", "s": "", "refs": ["5"], "ph": ""}, {"id": "b11", "c": "B", "l": "kdvh", "r": 0, "p": "R", "k": "s", "t": "Tính giá bán", "s": "", "refs": ["7"], "ph": ""}, {"id": "b12", "c": "B", "l": "dt", "r": 0, "p": "L", "k": "s", "t": "Đào tạo CH chạy thử", "s": "", "refs": ["8"], "ph": ""}, {"id": "b13", "c": "B", "l": "ch", "r": 0, "p": "L", "k": "s", "t": "Thử nghiệm & thu ý kiến KH", "s": "báo cáo ý kiến khách hàng", "refs": ["9"], "ph": ""}, {"id": "b15", "c": "B", "l": "kdvh", "r": 1, "p": "L", "k": "s", "t": "Kế hoạch KD sản phẩm mới", "s": "target, par stock 7 ngày, kế hoạch B", "refs": ["14"], "ph": ""}, {"id": "b16", "c": "B", "l": "kdvh", "r": 1, "p": "R", "k": "s", "t": "Order setup POS & gửi HTHT", "s": "KH số bán, chính sách thưởng, mã POS", "refs": ["15", "21"], "ph": ""}, {"id": "b17", "c": "B", "l": "htht", "r": 0, "p": "R", "k": "s", "t": "IT setup sản phẩm trên POS", "s": "mã sản phẩm", "refs": ["16"], "ph": ""}, {"id": "b18", "c": "B", "l": "htht", "r": 0, "p": "L", "k": "s", "t": "Gửi thông tin & hỗ trợ CH", "s": "tổng hợp từ các BP; xử lý phát sinh", "refs": ["23", "29"], "ph": ""}, {"id": "b19", "c": "B", "l": "mkt", "r": 0, "p": "L", "k": "s", "t": "Kế hoạch MKT & tài nguyên", "s": "CTBH đa kênh, KPIs; ảnh, POSM → HTHT", "refs": ["17", "18", "22"], "ph": ""}, {"id": "b20", "c": "B", "l": "dt", "r": 0, "p": "R", "k": "s", "t": "Kế hoạch & đào tạo cửa hàng", "s": "lịch qua HTHT; tập trung + online", "refs": ["19", "20", "24"], "ph": ""}, {"id": "b21", "c": "B", "l": "kdvh", "r": 2, "p": "L", "k": "s", "t": "Báo cáo sẵn sàng mở bán", "s": "QLKV xác nhận NV, POSM, món trên POS", "refs": ["25"], "ph": ""}, {"id": "b23", "c": "B", "l": "mkt", "r": 1, "p": "L", "k": "o", "t": "Triển khai truyền thông & CTBH", "s": "báo cáo 10/30 ngày; nội bộ qua Base", "refs": ["26", "30"], "ph": ""}, {"id": "b24", "c": "B", "l": "kdvh", "r": 2, "p": "R", "k": "o", "t": "Triển khai bán hàng & trao thưởng", "s": "báo cáo 10/30 ngày, KPIs thực tế", "refs": ["27", "31", "32"], "ph": ""}, {"id": "b25", "c": "B", "l": "qa", "r": 0, "p": "L", "k": "o", "t": "Đánh giá chất lượng sau 10 ngày", "s": "món, thao tác NVCH, tư vấn bán", "refs": ["28"], "ph": ""}, {"id": "b27", "c": "B", "l": "ns", "r": 0, "p": "R", "k": "s", "t": "Kế toán chuyển thưởng CH", "s": "", "refs": ["31"], "ph": ""}, {"id": "b28", "c": "B", "l": "mkt", "r": 1, "p": "R", "k": "o", "t": "Báo cáo kết quả Marketing", "s": "KPIs thực tế", "refs": ["33"], "ph": ""}, {"id": "c1", "c": "C", "l": "rnd", "r": 0, "p": "L", "k": "s", "t": "Đề xuất & lập kế hoạch", "s": "RnD hoặc CH/phòng ban có nhu cầu; timeline", "refs": ["1", "2", "3"], "ph": ""}, {"id": "c2", "c": "C", "l": "rnd", "r": 0, "p": "R", "k": "a", "t": "CEO duyệt kế hoạch", "s": "", "refs": ["3"], "ph": ""}, {"id": "c3", "c": "C", "l": "rnd", "r": 1, "p": "R", "k": "s", "t": "Lên ý tưởng dự kiến", "s": "", "refs": ["4"], "ph": ""}, {"id": "c4", "c": "C", "l": "rnd", "r": 1, "p": "L", "k": "s", "t": "Thử nếm & họp duyệt", "s": "thử nếm 1–2–3; giới thiệu sản phẩm", "refs": ["6", "7"], "ph": ""}, {"id": "c5", "c": "C", "l": "rnd", "r": 2, "p": "L", "k": "a", "t": "QA đối chiếu & CEO phê duyệt", "s": "hồ sơ nghiên cứu vs sản phẩm thực tế", "refs": ["8", "9"], "ph": ""}, {"id": "c6", "c": "C", "l": "cwkb", "r": 0, "p": "L", "k": "s", "t": "Nguồn cung & nhà sản xuất", "s": "", "refs": ["5"], "ph": ""}, {"id": "c7", "c": "C", "l": "qa", "r": 0, "p": "R", "k": "s", "t": "Hồ sơ pháp lý", "s": "", "refs": ["5"], "ph": ""}, {"id": "c8", "c": "C", "l": "cwkb", "r": 0, "p": "R", "k": "s", "t": "CWKB tính giá bán", "s": "", "refs": ["7"], "ph": ""}, {"id": "c9", "c": "C", "l": "cwkb", "r": 1, "p": "L", "k": "s", "t": "Gửi thông tin chốt", "s": "giá bán CH, KH, NPP, online; tài liệu SP", "refs": ["10"], "ph": ""}, {"id": "c10", "c": "C", "l": "cwkb", "r": 1, "p": "R", "k": "s", "t": "Công bố SP & lịch giao hàng", "s": "giấy tờ công bố, lịch đặt – giao", "refs": ["11"], "ph": ""}, {"id": "c11", "c": "C", "l": "kdvh", "r": 0, "p": "L", "k": "s", "t": "Kế hoạch KD sản phẩm mới", "s": "target, par stock 7 ngày, kế hoạch B", "refs": ["12"], "ph": ""}, {"id": "c12", "c": "C", "l": "kdvh", "r": 0, "p": "R", "k": "s", "t": "Order setup POS & gửi HTHT", "s": "số bán, thưởng, mã POS, HD bán, trưng bày", "refs": ["13", "17"], "ph": ""}, {"id": "c13", "c": "C", "l": "htht", "r": 0, "p": "R", "k": "s", "t": "IT setup sản phẩm trên POS", "s": "mã sản phẩm", "refs": ["14"], "ph": ""}, {"id": "c14", "c": "C", "l": "htht", "r": 0, "p": "L", "k": "s", "t": "Gửi thông tin & hỗ trợ CH", "s": "tổng hợp từ các BP; xử lý phát sinh", "refs": ["19", "25"], "ph": ""}, {"id": "c15", "c": "C", "l": "mkt", "r": 0, "p": "L", "k": "s", "t": "Kế hoạch MKT & tài nguyên", "s": "CTBH đa kênh, KPIs; ảnh, POSM → HTHT", "refs": ["15", "16", "18"], "ph": ""}, {"id": "c16", "c": "C", "l": "dt", "r": 0, "p": "R", "k": "s", "t": "Đào tạo cửa hàng", "s": "tập trung + online; pha chế, bán hàng", "refs": ["20"], "ph": ""}, {"id": "c17", "c": "C", "l": "kdvh", "r": 1, "p": "L", "k": "s", "t": "Báo cáo sẵn sàng mở bán", "s": "QLKV xác nhận NV, POSM, món trên POS", "refs": ["21"], "ph": ""}, {"id": "c19", "c": "C", "l": "mkt", "r": 1, "p": "L", "k": "o", "t": "Triển khai truyền thông & CTBH", "s": "báo cáo 10/30 ngày; nội bộ qua Base", "refs": ["22", "26"], "ph": ""}, {"id": "c20", "c": "C", "l": "kdvh", "r": 1, "p": "R", "k": "o", "t": "Triển khai bán hàng & trao thưởng", "s": "báo cáo 10/30 ngày, KPIs thực tế", "refs": ["23", "27", "28"], "ph": ""}, {"id": "c21", "c": "C", "l": "qa", "r": 0, "p": "L", "k": "o", "t": "Đánh giá chất lượng sau 10 ngày", "s": "món, thao tác NVCH, tư vấn bán", "refs": ["24"], "ph": ""}, {"id": "c22", "c": "C", "l": "ns", "r": 0, "p": "R", "k": "s", "t": "Kế toán chuyển thưởng CH", "s": "", "refs": ["27"], "ph": ""}, {"id": "c23", "c": "C", "l": "mkt", "r": 1, "p": "R", "k": "o", "t": "Báo cáo kết quả Marketing", "s": "KPIs thực tế", "refs": ["29"], "ph": ""}, {"id": "d1", "c": "D", "l": "qa", "r": 0, "p": "L", "k": "s", "t": "CV QC kiểm tra cửa hàng", "s": "ngẫu nhiên 1 lần/tháng; chụp ảnh bằng chứng", "refs": ["1.1"], "ph": ""}, {"id": "d2", "c": "D", "l": "qa", "r": 0, "p": "R", "k": "s", "t": "Khách hàng bí mật khảo sát", "s": "ngẫu nhiên 1 lần/tháng; điền form", "refs": ["2.1"], "ph": ""}, {"id": "d3", "c": "D", "l": "qa", "r": 1, "p": "R", "k": "s", "t": "Gửi bảng chấm / báo cáo KHBM", "s": "email hoặc bechecklist – điểm chấm", "refs": ["1.2", "2.2"], "ph": ""}, {"id": "d5", "c": "D", "l": "qa", "r": 1, "p": "L", "k": "d", "t": "TB 2 tháng < 75%?", "s": "", "refs": ["1.1"], "ph": ""}, {"id": "d7", "c": "D", "l": "ch", "r": 0, "p": "C", "k": "o", "t": "Phản hồi & khắc phục", "s": "QLCH/CĐT, trong 72h qua email/bechecklist", "refs": ["1.3", "2.3"], "ph": ""}, {"id": "e1", "c": "E", "l": "mkt", "r": 0, "p": "L", "k": "s", "t": "Tiếp nhận yêu cầu hỗ trợ", "s": "NVCH/CSKH: tìm thông tin, phản hồi KH", "refs": ["1.1", "1.2", "1.3", "1.4"], "ph": ""}, {"id": "e2", "c": "E", "l": "mkt", "r": 0, "p": "R", "k": "d", "t": "Là khiếu nại?", "s": "", "refs": ["1.1"], "ph": ""}, {"id": "e4", "c": "E", "l": "mkt", "r": 1, "p": "L", "k": "s", "t": "CSKH tiếp nhận & phân loại", "s": "FB, Zalo OA, QR, Maps, hotline, nội bộ", "refs": ["3.1"], "ph": ""}, {"id": "e5", "c": "E", "l": "mkt", "r": 1, "p": "R", "k": "d", "t": "Cấp 1?", "s": "", "refs": ["3.1"], "ph": ""}, {"id": "e7", "c": "E", "l": "mkt", "r": 2, "p": "R", "k": "a", "t": "Phê duyệt phương án & trao đổi KH", "s": "cấp 1: CSKH · cấp 2–4: BGĐ", "refs": ["3.3"], "ph": ""}, {"id": "e8", "c": "E", "l": "mkt", "r": 2, "p": "L", "k": "o", "t": "Báo cáo kết quả & đóng khiếu nại", "s": "tin nhắn, ghi âm, bằng chứng bồi hoàn", "refs": ["3.4", "3.5"], "ph": ""}, {"id": "e6", "c": "E", "l": "qa", "r": 0, "p": "R", "k": "s", "t": "QC điều tra nguyên nhân", "s": "camera, phỏng vấn NS, đối chiếu tiêu chuẩn", "refs": ["3.2"], "ph": ""}, {"id": "e10", "c": "E", "l": "ch", "r": 0, "p": "L", "k": "s", "t": "KH phản ánh tại cửa hàng", "s": "QLCH/TLCH tiếp nhận, phân cấp", "refs": ["2.1"], "ph": ""}, {"id": "e11", "c": "E", "l": "ch", "r": 0, "p": "R", "k": "d", "t": "Cấp 1?", "s": "", "refs": ["2.1"], "ph": ""}, {"id": "e12", "c": "E", "l": "ch", "r": 1, "p": "L", "k": "o", "t": "Xử lý tại điểm", "s": "theo hướng dẫn; chưa hài lòng → phương án khác", "refs": ["2.2", "2.3"], "ph": ""}, {"id": "e13", "c": "E", "l": "ch", "r": 1, "p": "R", "k": "s", "t": "ĐDCH giải trình & đề xuất", "s": "xác minh sự việc, nguyên nhân", "refs": ["3.2"], "ph": ""}, {"id": "f1", "c": "F", "l": "ch", "r": 0, "p": "L", "k": "s", "t": "QLCH gửi Base Request", "s": "mục tiêu, chương trình, thời gian, đối tượng", "refs": ["1.1"], "ph": ""}, {"id": "f2", "c": "F", "l": "ch", "r": 0, "p": "R", "k": "a", "t": "CĐT phê duyệt", "s": "", "refs": ["1.2"], "ph": ""}, {"id": "f3", "c": "F", "l": "kdvh", "r": 0, "p": "R", "k": "a", "t": "TP KDVH làm rõ & phê duyệt", "s": "phương án, chi phí hỗ trợ, phí nhượng quyền", "refs": ["1.3"], "ph": ""}, {"id": "f4", "c": "F", "l": "kdvh", "r": 0, "p": "L", "k": "s", "t": "CTKM kênh giao hàng", "s": "lập kế hoạch, order IT/MKT; báo HTHT", "refs": ["3.1", "3.2"], "ph": ""}, {"id": "f5", "c": "F", "l": "kdvh", "r": 1, "p": "L", "k": "o", "t": "Theo dõi & báo cáo", "s": "kết quả chương trình", "refs": ["3.5", "3.6"], "ph": ""}, {"id": "f6", "c": "F", "l": "mkt", "r": 0, "p": "R", "k": "a", "t": "TP MKT phê duyệt", "s": "phương án, chi phí hỗ trợ", "refs": ["1.4"], "ph": ""}, {"id": "f7", "c": "F", "l": "mkt", "r": 0, "p": "L", "k": "s", "t": "CTKM Offline / CRM", "s": "lập kế hoạch, POSM, order IT; báo HTHT", "refs": ["2.1", "2.2"], "ph": ""}, {"id": "f8", "c": "F", "l": "mkt", "r": 1, "p": "R", "k": "s", "t": "Triển khai & thông báo HTHT", "s": "thiết kế, in ấn, quảng cáo, order IT; code CT", "refs": ["1.5", "1.6"], "ph": ""}, {"id": "f9", "c": "F", "l": "mkt", "r": 1, "p": "L", "k": "o", "t": "Theo dõi & báo cáo kết quả", "s": "doanh thu, chi phí, lượt tiếp cận", "refs": ["1.9", "2.5", "2.6"], "ph": ""}, {"id": "f10", "c": "F", "l": "htht", "r": 0, "p": "C", "k": "s", "t": "Gửi thông báo đến cửa hàng", "s": "qua mail", "refs": ["1.7", "2.3", "3.3"], "ph": ""}, {"id": "f11", "c": "F", "l": "ch", "r": 1, "p": "C", "k": "o", "t": "Xác nhận & triển khai tại CH", "s": "POS, POSM, app giao hàng; báo lỗi", "refs": ["1.8", "2.4", "3.4"], "ph": ""}], EDGES=[{"f": "a1", "t": "a2", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "a2", "t": "a5", "d": false, "lb": "duyệt", "fs": null, "ts": null}, {"f": "a5", "t": "a3", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "a3", "t": "a6", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "a3", "t": "a7", "d": true, "lb": "họp dự án", "fs": null, "ts": null}, {"f": "a7", "t": "a18", "d": true, "lb": "order NVL, nội thất", "fs": null, "ts": null}, {"f": "a7", "t": "a8", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "a8", "t": "a19", "d": true, "lb": "order tuyển dụng", "fs": null, "ts": null}, {"f": "a19", "t": "a15", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "a6", "t": "a9", "d": false, "lb": "bàn giao MB", "fs": null, "ts": null}, {"f": "a18", "t": "a9", "d": true, "lb": "giao hàng", "fs": null, "ts": null}, {"f": "a14", "t": "a9", "d": true, "lb": "nghiệm thu IT", "fs": null, "ts": null}, {"f": "a7", "t": "a16", "d": true, "lb": "pháp lý NCC", "fs": null, "ts": null}, {"f": "a9", "t": "a10", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "a10", "t": "a21", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "a12", "t": "a13", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "a21", "t": "a11", "d": true, "lb": "", "fs": null, "ts": null}, {"f": "a7", "t": "a12", "d": true, "lb": "", "fs": null, "ts": null}, {"f": "a19", "t": "a20", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "a21", "t": "a17", "d": true, "lb": "sau dự án", "fs": null, "ts": null}, {"f": "a11", "t": "a4", "d": true, "lb": "rút kinh nghiệm", "fs": null, "ts": null}, {"f": "b1", "t": "b2", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "b2", "t": "b3", "d": false, "lb": "duyệt", "fs": null, "ts": null}, {"f": "b3", "t": "b4", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "b4", "t": "b3", "d": true, "lb": "điều chỉnh", "fs": "t", "ts": "t"}, {"f": "b4", "t": "b5", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "b5", "t": "b11", "d": true, "lb": "giá bán", "fs": null, "ts": null}, {"f": "b5", "t": "b12", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "b12", "t": "b13", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "b13", "t": "b6", "d": false, "lb": "ý kiến KH", "fs": null, "ts": null}, {"f": "b6", "t": "b7", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "b7", "t": "b8", "d": false, "lb": "duyệt", "fs": null, "ts": null}, {"f": "b8", "t": "b15", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "b15", "t": "b16", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "b16", "t": "b17", "d": false, "lb": "order POS", "fs": null, "ts": null}, {"f": "b17", "t": "b18", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "b19", "t": "b18", "d": true, "lb": "", "fs": null, "ts": null}, {"f": "b18", "t": "b21", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "b21", "t": "b23", "d": false, "lb": "mở bán", "fs": null, "ts": null}, {"f": "b21", "t": "b24", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "b23", "t": "b28", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "b3", "t": "b9", "d": true, "lb": "nguồn cung", "fs": null, "ts": null}, {"f": "b3", "t": "b10", "d": true, "lb": "pháp lý", "fs": null, "ts": null}, {"f": "b8", "t": "b20", "d": true, "lb": "", "fs": null, "ts": null}, {"f": "b20", "t": "b18", "d": true, "lb": "lịch đào tạo", "fs": null, "ts": null}, {"f": "b24", "t": "b25", "d": true, "lb": "sau 10 ngày", "fs": null, "ts": null}, {"f": "b24", "t": "b27", "d": true, "lb": "chuyển thưởng", "fs": null, "ts": null}, {"f": "c1", "t": "c2", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "c2", "t": "c3", "d": false, "lb": "duyệt", "fs": null, "ts": null}, {"f": "c3", "t": "c4", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "c4", "t": "c3", "d": true, "lb": "điều chỉnh", "fs": "t", "ts": "t"}, {"f": "c4", "t": "c5", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "c5", "t": "c9", "d": false, "lb": "duyệt", "fs": null, "ts": null}, {"f": "c9", "t": "c10", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "c9", "t": "c11", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "c11", "t": "c12", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "c12", "t": "c13", "d": false, "lb": "order POS", "fs": null, "ts": null}, {"f": "c13", "t": "c14", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "c15", "t": "c14", "d": true, "lb": "", "fs": null, "ts": null}, {"f": "c14", "t": "c17", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "c17", "t": "c19", "d": false, "lb": "mở bán", "fs": null, "ts": null}, {"f": "c17", "t": "c20", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "c19", "t": "c23", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "c3", "t": "c6", "d": true, "lb": "nguồn cung", "fs": null, "ts": null}, {"f": "c3", "t": "c7", "d": true, "lb": "pháp lý", "fs": null, "ts": null}, {"f": "c4", "t": "c8", "d": true, "lb": "giá bán", "fs": null, "ts": null}, {"f": "c9", "t": "c16", "d": true, "lb": "", "fs": null, "ts": null}, {"f": "c20", "t": "c21", "d": true, "lb": "sau 10 ngày", "fs": null, "ts": null}, {"f": "c20", "t": "c22", "d": true, "lb": "chuyển thưởng", "fs": null, "ts": null}, {"f": "d1", "t": "d3", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "d2", "t": "d3", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "d3", "t": "d7", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "d3", "t": "d5", "d": true, "lb": "", "fs": null, "ts": null}, {"f": "d5", "t": "d1", "d": true, "lb": "Có: 2 lần/tháng", "fs": null, "ts": null}, {"f": "e1", "t": "e2", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "e2", "t": "e4", "d": false, "lb": "Có", "fs": null, "ts": null}, {"f": "e4", "t": "e5", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "e5", "t": "e7", "d": false, "lb": "Cấp 1", "fs": null, "ts": null}, {"f": "e5", "t": "e6", "d": false, "lb": "Cấp 2–4", "fs": null, "ts": null}, {"f": "e5", "t": "e13", "d": true, "lb": "", "fs": null, "ts": null}, {"f": "e6", "t": "e7", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "e13", "t": "e7", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "e7", "t": "e8", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "e10", "t": "e11", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "e11", "t": "e12", "d": false, "lb": "Có", "fs": null, "ts": null}, {"f": "e11", "t": "e4", "d": true, "lb": "Cấp 2–4 · Base Workflow", "fs": null, "ts": null}, {"f": "f1", "t": "f2", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "f2", "t": "f3", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "f3", "t": "f6", "d": false, "lb": "duyệt", "fs": null, "ts": null}, {"f": "f6", "t": "f8", "d": false, "lb": "duyệt", "fs": null, "ts": null}, {"f": "f8", "t": "f10", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "f7", "t": "f10", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "f4", "t": "f10", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "f10", "t": "f11", "d": false, "lb": "", "fs": null, "ts": null}, {"f": "f11", "t": "f9", "d": true, "lb": "", "fs": null, "ts": null}, {"f": "f11", "t": "f5", "d": true, "lb": "", "fs": null, "ts": null}], XL={"A": {"sheet": "Cửa hàng mới", "title": "QUY TRÌNH MỞ CỬA HÀNG MỚI", "steps": [{"id": "1", "grp": "Trước dự án", "n": 1, "nguoi": "CV Điều phối dự án", "bp": "Phòng Phát triển thị trường", "hd": "Tiếp nhận thông tin và đánh giá địa điểm", "mt": "- Đánh giá địa điểm và chủ đầu tư (CĐT) thông qua trao đổi và tự khảo sát\n- Gửi CEO phê duyệt, nếu được duyệt, chuyển sang bước 2", "dl": "- Đánh giá mặt bằng:\n+ Hình ảnh mặt bằng\n+ Thông tin mặt bằng\n+ Điều kiện hạ tầng\n+ Thông tin thuê mặt bằng\n+ Tiện ích khu vực\n+ Giao thông khu vực\n+ Đối thủ cạnh tranh\n+ Tổng đầu tư dự kiến\n\n- Đánh giá chủ đầu tư", "gc": ""}, {"id": "2", "grp": "Trước dự án", "n": 2, "nguoi": "CV Thiết kế và giám sát", "bp": "Phòng Xây dựng", "hd": "Khảo sát xây dựng", "mt": "- Khảo sát mặt bằng\n- Lên kế hoạch, thời gian dự kiến khởi công và hoàn thiện", "dl": "- Dự toán xây dựng", "gc": "Không thu thập trong hiện tại"}, {"id": "3", "grp": "Trước dự án", "n": 3, "nguoi": "CV Điều phối dự án", "bp": "Phòng Phát triển thị trường", "hd": "Chốt hợp tác và họp dự án", "mt": "- Ký hợp đồng với chủ đầu tư\n- Lên timeline dự án\n- Dự toán và phân bổ chi phí dự án\n- Tổng hợp hồ sơ đối tác\n- Họp dự án với các phòng ban trong công ty", "dl": "- Timeline dự án\n- Chi phí dự án", "gc": "Ngày mở bán, ngày khai trương"}, {"id": "4", "grp": "Chuẩn bị", "n": 4, "nguoi": "CV Thiết kế và giám sát", "bp": "Phòng Xây dựng", "hd": "Thiết kế", "mt": "- Thiết kế layout\n- Thiết kế 3D\n- Thiết kế kỹ thuật", "dl": "- Chủ đề thiết kế\n- Thiết kế 2D\n- Thiết kế 3D\n- Hồ sơ kỹ thuật: Thiết kế M&E, internet, camera, âm thanh", "gc": ""}, {"id": "5", "grp": "Chuẩn bị", "n": 5, "nguoi": "CV Thiết kế và giám sát", "bp": "Phòng Xây dựng", "hd": "- Lên danh sách nội thất, trang trí\n- Gửi order cho CWKB/ NCC khác để sản xuất", "mt": "", "dl": "- Danh sách đồ nội thất, trang trí", "gc": ""}, {"id": "6", "grp": "Chuẩn bị", "n": 6, "nguoi": "Trưởng phòng cung ứng nội thất", "bp": "Phòng Cung ứng nội thất - CWKB", "hd": "- Nhận order\n- Tiến hành sản xuất\n- Bàn giao", "mt": "", "dl": "Ngày đi hàng", "gc": ""}, {"id": "7", "grp": "Chuẩn bị", "n": 7, "nguoi": "CV Đào tạo", "bp": "Bộ phận đào tạo", "hd": "- Lập kế hoạch đào tạo nhân sự\n- Lên danh sách và đặt hàng NVL đào tạo", "mt": "", "dl": "- Thời gian đào tạo\n- Nhân sự đào tạo\n- Danh sách NVL cần dùng\n- Chi phí đào tạo", "gc": ""}, {"id": "8", "grp": "Chuẩn bị", "n": 8, "nguoi": "CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Lập định hướng kinh doanh", "mt": "Đánh giá chuyên sâu về mặt bằng, thị trường sau đó đưa ra định hướng kinh doanh", "dl": "- Định hướng kinh doanh\n+ Khách hàng mục tiêu\n+ Chiến lược về kinh doanh online, offline, truyền thông\n+ Mục tiêu kinh doanh (doanh thu)", "gc": ""}, {"id": "9", "grp": "Chuẩn bị", "n": 9, "nguoi": "- Trưởng nhóm Trade Marketing\n- Trưởng nhóm nội dung", "bp": "Phòng Marketing", "hd": "Lập kế hoạch marketing", "mt": "- Lập kế hoạch marketing cho giai đoạn khai trương và 1 tháng sau khai trương", "dl": "- Thông điệp chủ đạo\n- Các chương trình khuyến mại\n- Kênh truyền thông\n- Chi phí dự kiến\n- Thời gian triển khai", "gc": ""}, {"id": "10", "grp": "Chuẩn bị", "n": 10, "nguoi": "CV Thiết kế\nCV Media\nCV Nội dung", "bp": "Phòng Marketing", "hd": "Chuẩn bị nội dung truyền thông", "mt": "- Chụp, thiết kế hình ảnh, dựng video truyền thông\n- Lên địa điểm google maps, facebook", "dl": "- Google location point", "gc": ""}, {"id": "11", "grp": "Chuẩn bị", "n": 11, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "- Thu thập hồ sơ pháp lý cửa hàng", "mt": "Liên quan đến NCC NVL địa phương, chứng nhận ATVSTP, PCCC", "dl": "", "gc": ""}, {"id": "12", "grp": "Chuẩn bị", "n": 12, "nguoi": "Trưởng phòng quản lý chất lượng", "bp": "Phòng quản lý chất lượng", "hd": "- Kiểm tra hồ sơ pháp lý liên quan đến NCC NVL", "mt": "", "dl": "", "gc": ""}, {"id": "13", "grp": "Chuẩn bị", "n": 13, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "- Lên danh sách NVL, CCDC, sản phẩm thương mại\n- Gửi order cho CWKB / NCC khác", "mt": "", "dl": "- Danh sách NVL, CCDC, SPTM\n- Chi phí", "gc": ""}, {"id": "14", "grp": "Chuẩn bị", "n": 14, "nguoi": "Trưởng phòng cung ứng nguyên vật liệu", "bp": "Phòng Cung ứng nguyên vật liệu - CWKB", "hd": "- Nhận order\n- Chuẩn bị hàng hóa\n- Bàn giao", "mt": "", "dl": "Ngày đi hàng", "gc": ""}, {"id": "15", "grp": "Chuẩn bị", "n": 15, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "- Định biên nhân sự\n- Gửi order cho tuyển dụng\n- Bảng phân công công việc", "mt": "- Định biên, cơ cấu quản lý nhân sự cho cửa hàng\n- Gửi order cho P. Nhân sự để tiến hành tuyển dụng", "dl": "- Định biên, công thức nhân sự: Số lượng nhân sự parttime, fulltime, bảo vệ\n- Thời gian mở cửa\n- Phân bổ nhân sự theo ca\n- Chi phí nhân sự (COL) dự kiến", "gc": ""}, {"id": "16", "grp": "Chuẩn bị", "n": 16, "nguoi": "CV Tuyển dụng", "bp": "Phòng Nhân sự", "hd": "Tuyển dụng nhân sự cho cửa hàng", "mt": "- Đăng tin tuyển dụng\n- Phỏng vấn\n- Chốt cơ chế lương, thưởng, phụ cấp với CĐT\n- Chuyển danh sách đào tạo cho BP. Đào tạo\n- Bàn giao nhân sự cho VHM", "dl": "- Chính sách lương thưởng\n- Danh sách nhân viên", "gc": ""}, {"id": "17", "grp": "Chuẩn bị", "n": 17, "nguoi": "Trưởng phòng kế toán", "bp": "Phòng Kế toán", "hd": "Đào tạo kế toán cửa hàng", "mt": "", "dl": "- Thời gian đào tạo\n- Nội dung đào tạo", "gc": ""}, {"id": "18", "grp": "Chuẩn bị", "n": 18, "nguoi": "CV Đào tạo", "bp": "Bộ phận đào tạo", "hd": "- Đào tạo ĐTNQ\n- Đào tạo nhân sự cửa hàng", "mt": "Đào tạo về tinh thần Cộng, pha chế, phục vụ", "dl": "- Thời gian đào tạo\n- Nội dung đào tạo\n- Điểm đánh giá\n- Kết quả đánh giá", "gc": ""}, {"id": "19", "grp": "Chuẩn bị", "n": 19, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "Đánh giá sau đào tạo", "mt": "Nộp báo cáo chi tiết đánh giá từng nhân sự, đồng thời cập nhật phương án đào tạo và chất lượng nhân sự", "dl": "- Kết quả đánh giá", "gc": ""}, {"id": "20", "grp": "Chuẩn bị", "n": 20, "nguoi": "CV Thiết kế và giám sát", "bp": "Phòng Xây dựng", "hd": "Giám sát thi công", "mt": "Giám sát tiến độ và chất lượng thi công", "dl": "- Hình ảnh xây dựng cơ bản, hoàn thiện", "gc": ""}, {"id": "21", "grp": "Chuẩn bị", "n": 21, "nguoi": "CV IT", "bp": "BP. Hỗ trợ hệ thống", "hd": "Lắp đặt IT", "mt": "- Lắp đặt Đường truyền internet\n- Lắp đặt thiết bị Wifi, Camera, Âm thanh, máy chấm công\n- Cài đặt Cấu hình thiết bị online\n- Lắp đặt và cấu hình Ipos + máy in", "dl": "- Thời gian thi công\n- Thời gian hoàn thành", "gc": ""}, {"id": "22", "grp": "Chuẩn bị", "n": 22, "nguoi": "CV Hỗ trợ hệ thống", "bp": "BP. Hỗ trợ hệ thống", "hd": "Đăng ký đối tác", "mt": "- Đăng ký đối tác giao hàng\n- Đăng ký đối tác thanh toán\n- Đăng ký bản quyền âm nhạc", "dl": "- Thời gian hoàn thành", "gc": ""}, {"id": "23", "grp": "Nhận bàn giao và sắp xếp", "n": 23, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "Nhận bàn giao", "mt": "- Nhận bàn giao mặt bằng 3 bên\n- Nghiệm thu thiết bị, dây mạng, chia line\n- Nhận và giao NVL, CCDC và TTB cho QLCH/Đại diện CH\n- Nhận bàn giao ND và POSM CT MKT trong Ngày/ Tuần/Tháng khai trương", "dl": "", "gc": ""}, {"id": "24", "grp": "Nhận bàn giao và sắp xếp", "n": 24, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "Setup cửa hàng đủ điều kiện đi vào hoạt động", "mt": "Bám theo nhóm/vị trí trong bảng PCCV. Khu vực pha chế nào để CCDC và NVL tại đó. Dễ thao tác", "dl": "", "gc": ""}, {"id": "25", "grp": "Nhận bàn giao và sắp xếp", "n": 25, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "Kiểm tra trang công năng hoạt động chung điện, nước, trang thiết bị", "mt": "Mở toàn bộ thiết bị điện, nước, bật toàn bộ các thiết bị trong cửa hàng để kiểm tra công suất, tình trạng hoạt động chung của cửa hàng.", "dl": "", "gc": ""}, {"id": "26", "grp": "Chạy thử", "n": 26, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "Phương án chạy thử", "mt": "", "dl": "- Thời gian\n- Bố trí vị trí nhân sự\n- Nội dung chạy thử", "gc": ""}, {"id": "27", "grp": "Chạy thử", "n": 27, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "- Đánh giá năng lực vận hành chung của cửa hàng sau chạy thử\n- Tổng kết chạy thử", "mt": "- Vận hành ca\n- Sơ chế\n- Pha chế\n- Chu trình bán hàng\n- Thao tác máy iPOS\n- Tắt bật thiết bị phát nhạc\n- Chu trình phục vụ, dọn bàn\n- Sắp xếp quầy tự phục vụ\n- Chu trình sắp xếp không gian cửa hàng (bàn ghế hoa, gạt tàn, camen, standee)\n- Xử lý tình huống chăm sóc khách hàng\n- Làm sạch, vệ sinh\n- Bảo vệ\n- Tổng kết thu chi - báo cáo doanh thu\n- Bàn giao ca", "dl": "Kết quả đánh giá", "gc": ""}, {"id": "28", "grp": "Huấn luyện và chuyển giao vận hành ĐTNQ & BQL Cửa hàng", "n": 28, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "Đánh giá kỹ năng đứng vị trí trong ca (bán hàng, phục vụ, pha chế)", "mt": "- Đánh giá khả năng sắp xếp, điều phối bar\n- Đánh giá kỹ năng giao tiếp, xử lý tình huống, tư duy dịch vụ\n- Đánh giá kỹ năng sắp xếp lịch làm việc, quản lý chi phí nhân sự\n- Đánh giá kỹ năng quản lý tài chính, doanh thu\n- Đánh giá kỹ năng vận hành ca hiệu quả\n- Đánh giá kỹ năng đào tạo nhân viên tại điểm\n- Đánh giá kỹ năng quản lý hàng hóa", "dl": "Kết quả đánh giá", "gc": ""}, {"id": "29", "grp": "Huấn luyện và chuyển giao vận hành ĐTNQ & BQL Cửa hàng", "n": 29, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "Thêm ĐTNQ, BQL cửa hàng vào các nhóm làm việc", "mt": "- Email cửa hàng\n- Nhóm làm việc trên Base\n- Nhóm xử lý khiếu nại", "dl": "", "gc": ""}, {"id": "30", "grp": "Huấn luyện và chuyển giao vận hành ĐTNQ & BQL Cửa hàng", "n": 30, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "Bàn giao tài liệu, biểu mẫu, nghiệm thu quá trình huấn luyện", "mt": "- Lập biên bản danh mục tài liệu, biểu mẫu online, offline, quá trình huấn luyện ký nhận giữa hai bên.\n- Kiếm tra trực tiếp khả năng tiếp cận thư viện tài liệu của ĐTNQ", "dl": "", "gc": ""}, {"id": "31", "grp": "Khai trương", "n": 31, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "Hỗ trợ khai trương", "mt": "- Hỗ trợ cửa hàng vận hành\n- Đánh giá, rút kinh nghiệm sau ngày khai trương", "dl": "", "gc": ""}, {"id": "32", "grp": "Khai trương", "n": 32, "nguoi": "Trưởng nhóm nội dung", "bp": "Phòng Marketing", "hd": "Hỗ trợ khai trương", "mt": "- Thu thập tư liệu\n- Triển khai truyền thông online và offline", "dl": "", "gc": ""}, {"id": "33", "grp": "Sau dự án", "n": 33, "nguoi": "Quản lý khu vực (Vận hành mẫu)", "bp": "Phòng Kinh doanh vận hành", "hd": "Báo cáo vận hành", "mt": "- Thu thập ý kiến đánh giá của khách hàng\n- Hoàn thiện sổ tay chỉ dẫn cửa hàng\n- Doanh thu cửa hàng so với target (2 tuần đầu)\n- Báo cáo vận hành mẫu", "dl": "- Đánh giá của khách hàng\n- Sổ tay chỉ dẫn", "gc": ""}, {"id": "34", "grp": "Sau dự án", "n": 34, "nguoi": "Trưởng phòng Marketing", "bp": "Phòng Marketing", "hd": "Báo cáo truyền thông", "mt": "", "dl": "Báo cáo hiệu quả truyền thông\n- Chi phí\n- Kết quả: Tiếp cận, tương tác\nBáo cáo hiệu quả CTKM\n- Chi phí\n- Doanh thu", "gc": ""}, {"id": "35", "grp": "Sau dự án", "n": 35, "nguoi": "Trưởng bộ phận kiểm soát chất lượng", "bp": "Phòng Quản lý chất lượng", "hd": "Đánh giá chất lượng XD & VH CHM", "mt": "- Đánh giá chất lượng XD & VH CHM\n- Gửi báo cáo CEO", "dl": "Báo cáo đánh giá", "gc": ""}, {"id": "36", "grp": "Sau dự án", "n": 36, "nguoi": "Trưởng phòng Nhân sự", "bp": "Phòng Nhân sự", "hd": "Bảng thưởng dự án", "mt": "- Tính thưởng Kinh doanh\n- Tính thưởng hiệu quả xây dựng CHM", "dl": "", "gc": ""}, {"id": "37", "grp": "Sau dự án", "n": 37, "nguoi": "Trưởng phòng Phát triển thị trường", "bp": "Phòng Phát triển thị trường", "hd": "Họp rút kinh nghiệm dự án", "mt": "Họp các bộ phận rút kinh nghiệm dự án", "dl": "Biên bản tổng hợp", "gc": ""}]}, "B": {"sheet": "Đồ uống mới", "title": "QUY TRÌNH RA MẮT ĐỒ UỐNG MỚI", "steps": [{"id": "1", "grp": "Nghiên cứu sản phẩm", "n": 1, "nguoi": "Trưởng phòng nghiên cứu và phát triển (RnD)", "bp": "- Phòng Nghiên cứu và phát triển (RnD)\n- Cửa hàng / Phòng ban có nhu cầu", "hd": "Đề xuất nghiên cứu sản phẩm mới/ cải tiến", "mt": "- RnD soạn kế hoạch, trình CEO duyệt\n- Cửa hàng / Phòng ban nếu có nhu cầu gửi request cho RnD, CEO, QA", "dl": "", "gc": ""}, {"id": "2", "grp": "Nghiên cứu sản phẩm", "n": 2, "nguoi": "Trưởng phòng RnD", "bp": "Phòng RnD", "hd": "Tổ chức thảo luận, đánh giá đề xuất", "mt": "Họp cùng bộ phận đề xuất để đánh giá đề xuất", "dl": "", "gc": ""}, {"id": "3", "grp": "Nghiên cứu sản phẩm", "n": 3, "nguoi": "Trưởng phòng RnD", "bp": "Phòng RnD", "hd": "Lập kế hoạch", "mt": "- Lập kế hoạch triển khai dự án\n- Trình CEO phê duyệt, nếu được duyệt, chuyển bước 4", "dl": "Timeline dự án", "gc": ""}, {"id": "4", "grp": "Nghiên cứu sản phẩm", "n": 4, "nguoi": "Trưởng phòng RnD", "bp": "Phòng RnD", "hd": "Lên ý tưởng và công thức dự kiến", "mt": "", "dl": "", "gc": ""}, {"id": "5", "grp": "Nghiên cứu sản phẩm", "n": 5, "nguoi": "- Trưởng phòng Cung ứng Nguyên vật liệu\n- Trưởng BP. Kiểm soát chất lượng", "bp": "Phòng Cung ứng Nguyên vật liệu - CWKB\nPhòng Quản lý chất lượng", "hd": "Chuẩn bị nguồn cung và hồ sơ", "mt": "Từ công thức dự kiến của RnD, CWKB tìm hiểu trước nguồn cung và hồ sơ pháp lý", "dl": "NVL, CCDC sử dụng", "gc": ""}, {"id": "6", "grp": "Nghiên cứu sản phẩm", "n": 6, "nguoi": "- Trưởng phòng RnD\n- Trưởng phòng Kinh doanh vận hành\n- Trưởng BP. Kiểm soát chất lượng\n- Trưởng phòng Quản lý chất lượng\nCEO\n- PGĐ Vận hành", "bp": "Phòng RnD", "hd": "Thử nếm lần 1,2,3", "mt": "Thử nếm, đánh giá và điều chỉnh sau mỗi lần thử nếm", "dl": "", "gc": ""}, {"id": "7", "grp": "Nghiên cứu sản phẩm", "n": 7, "nguoi": "- Trưởng phòng RnD\n- Trưởng phòng Kinh doanh vận hành\n- Trưởng BP. Kiểm soát chất lượng\n- Trưởng phòng Quản lý chất lượng\nCEO\n- PGĐ Vận hành", "bp": "Phòng RnD", "hd": "Họp thảo luận và duyệt", "mt": "- RnD tính giá vốn\n- Kinh doanh vận hành tính giá bán", "dl": "", "gc": ""}, {"id": "8", "grp": "Nghiên cứu sản phẩm", "n": 8, "nguoi": "Trưởng BP. Đào tạo", "bp": "BP. Đào tạo", "hd": "Đào tạo cửa hàng chạy thử", "mt": "Đào tạo pha chế cho các cửa hàng triển khai chạy thử", "dl": "", "gc": ""}, {"id": "9", "grp": "Nghiên cứu sản phẩm", "n": 9, "nguoi": "Một số cửa hàng", "bp": "Cửa hàng", "hd": "Thử nghiệm thực tế và thu thập ý kiến khách hàng", "mt": "- Thử nghiệm tại một số cửa hàng (mời khách dùng thử)\n- Thu thập ý kiến đánh giá của khách hàng", "dl": "Báo cáo ý kiến đánh giá của khách hàng", "gc": ""}, {"id": "10", "grp": "Nghiên cứu sản phẩm", "n": 10, "nguoi": "Trưởng phòng RnD", "bp": "Phòng RnD", "hd": "Hoàn thành bộ tiêu chuẩn", "mt": "- Hoàn thiện bộ tiêu chuẩn pha chế", "dl": "", "gc": ""}, {"id": "11", "grp": "Nghiên cứu sản phẩm", "n": 11, "nguoi": "Trưởng phòng RnD", "bp": "Phòng RnD", "hd": "QA kiểm tra thông tin", "mt": "Đối chiếu và xác nhận thông tin trên hồ sơ nghiên cứu với Bộ tiêu chuẩn pha chế", "dl": "", "gc": ""}, {"id": "12", "grp": "Nghiên cứu sản phẩm", "n": 12, "nguoi": "Trưởng phòng RnD", "bp": "Phòng RnD", "hd": "CEO phê duyệt", "mt": "", "dl": "", "gc": ""}, {"id": "13", "grp": "Chuẩn bị mở bán", "n": 13, "nguoi": "Trưởng phòng RnD", "bp": "Phòng RnD", "hd": "Gửi thông tin chốt đến các BP liên quan (P. Quản lý chất lượng, P. Kinh doanh vận hành, BP. Đào tạo)", "mt": "Gửi email thông tin", "dl": "- Giá vốn, giá bán\n- Công thức (Bộ tiêu chuẩn pha chế đồ uống mới)\n- Tài liệu giới thiệu sản phẩm\n- CCDC, NVL mới nếu có", "gc": ""}, {"id": "14", "grp": "Chuẩn bị mở bán", "n": 14, "nguoi": "Trưởng phòng Kinh doanh vận hành", "bp": "Phòng Kinh doanh vận hành", "hd": "Kế hoạch kinh doanh sản phẩm mới", "mt": "", "dl": "- Mục tiêu kinh doanh hệ thống (volume, value)\n- Mục tiêu doanh thu hệ thống - điểm hòa doanh thu\n- Tỷ lệ sản phẩm mới/tổng sản phẩm\n- Dự báo par stock NVL mới trong 7 ngày đầu\n- Kế hoạch B nếu không đạt 60% target 7 ngày đầu\n- Chi phí kế hoạch\n- Chính sách thưởng cửa hàng", "gc": ""}, {"id": "15", "grp": "Chuẩn bị mở bán", "n": 15, "nguoi": "CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Order setup sản phẩm trên máy POS", "mt": "Gửi order cho IT", "dl": "", "gc": ""}, {"id": "16", "grp": "Chuẩn bị mở bán", "n": 16, "nguoi": "CV IT", "bp": "BP. Hỗ trợ hệ thống", "hd": "Setup sản phẩm trên máy POS", "mt": "Setup theo order của CV Kinh doanh", "dl": "Mã sản phẩm", "gc": ""}, {"id": "17", "grp": "Chuẩn bị mở bán", "n": 17, "nguoi": "Trưởng phòng Marketing", "bp": "Phòng Marketing", "hd": "Kế hoạch marketing sản phẩm mới", "mt": "", "dl": "- Chương trình bán hàng đa kênh offline, CRM, deli, Khách hàng thành viên, Chính sách hỗ trợ bán hàng\n- Kế hoạch truyền thông sản phẩm mới: kênh truyền thông, chi phí theo kênh, nội dung truyền thông, KPIs truyền thông", "gc": ""}, {"id": "18", "grp": "Chuẩn bị mở bán", "n": 18, "nguoi": "- Trưởng nhóm Trade Marketing\n- Trưởng nhóm nội dung", "bp": "Phòng Marketing", "hd": "Chuẩn bị tài nguyên", "mt": "- Chụp ảnh sản phẩm mới\n- Thiết kế/ Chụp các ấn phẩm truyền thông\n- In ấn\n- Chuyển POSM đến cửa hàng", "dl": "", "gc": ""}, {"id": "19", "grp": "Chuẩn bị mở bán", "n": 19, "nguoi": "Trưởng BP. Đào tạo", "bp": "BP. Đào tạo", "hd": "Kế hoạch đào tạo cửa hàng", "mt": "", "dl": "- Thời gian đào tạo\n- Nội dung đào tạo", "gc": ""}, {"id": "20", "grp": "Chuẩn bị mở bán", "n": 20, "nguoi": "Trưởng BP. Đào tạo", "bp": "BP. Đào tạo", "hd": "Gửi thông tin đến BP. HTHT", "mt": "Gửi lịch đào tạo để cửa hàng đăng ký lịch tham gia", "dl": "", "gc": ""}, {"id": "21", "grp": "Chuẩn bị mở bán", "n": 21, "nguoi": "CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Gửi thông tin đến BP. HTHT", "mt": "Gửi thông tin cho BP. Hỗ trợ hệ thống để chuyển cho cửa hàng:\n- Kế hoạch số bán theo cửa hàng\n- Chính sách thưởng\n- Mã sản phẩm trên POS", "dl": "", "gc": ""}, {"id": "22", "grp": "Chuẩn bị mở bán", "n": 22, "nguoi": "Trưởng phòng Marketing", "bp": "Phòng Marketing", "hd": "Gửi thông tin đến BP. HTHT", "mt": "Gửi thông tin cho BP. Hỗ trợ hệ thống để chuyển cho cửa hàng:\n- Chương trình bán hàng\n- Các loại POSM và thời gian vận chuyển", "dl": "", "gc": ""}, {"id": "23", "grp": "Chuẩn bị mở bán", "n": 23, "nguoi": "CV Hỗ trợ hệ thống", "bp": "BP. Hỗ trợ hệ thống", "hd": "Gửi thông tin đến cửa hàng", "mt": "Tổng hợp thông tin từ các BP, Phòng ban, sau đó chuyển cho cửa hàng", "dl": "", "gc": ""}, {"id": "24", "grp": "Chuẩn bị mở bán", "n": 24, "nguoi": "CV Đào tạo", "bp": "BP. Đào tạo", "hd": "Đào tạo cửa hàng", "mt": "Đào tạo tập trung và online về pha chế, bán hàng", "dl": "Báo cáo kết quả tham gia đào tạo", "gc": ""}, {"id": "25", "grp": "Chuẩn bị mở bán", "n": 25, "nguoi": "Quản lý khu vực", "bp": "Phòng Kinh doanh vận hành", "hd": "Báo cáo chuẩn bị trước mở bán", "mt": "Xác nhận đã tự đào tạo cho NV, đã nhận đủ POSM, kiểm tra món trên POS, sẵn sàng mở bán", "dl": "", "gc": ""}, {"id": "26", "grp": "Mở bán", "n": 26, "nguoi": "Trưởng phòng Marketing", "bp": "Phòng Marketing", "hd": "Triển khai truyền thông, CTBH", "mt": "- Triển khai truyền thông, CTBH theo kế hoạch\n- Xử lý các vấn đề phát sinh\n- Theo dõi đánh giá đánh giá khách hàng", "dl": "Báo cáo 10 ngày, 30 ngày", "gc": "Output"}, {"id": "27", "grp": "Mở bán", "n": 27, "nguoi": "- Quản lý khu vực\n- CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Triển khai bán hàng", "mt": "- Theo dõi tình hình số bán chung và từng cửa hàng AM phụ trách\n- Theo dõi tình hình nhập NVL, pha chế, cách thức bán hàng\n- Sửa lỗi vận hành\n- Điều chỉnh kế hoạch nếu cần", "dl": "Báo cáo 10 ngày, 30 ngày", "gc": "Output"}, {"id": "28", "grp": "Mở bán", "n": 28, "nguoi": "Trưởng phòng Quản lý chất lượng", "bp": "Phòng Quản lý chất lượng", "hd": "Đánh giá chất lượng món, thao tác NVCH, tư vấn bán hàng sau 10 ngày", "mt": "", "dl": "Báo cáo thực trạng", "gc": "Output"}, {"id": "29", "grp": "Mở bán", "n": 29, "nguoi": "CV Hỗ trợ hệ thống\nCV IT", "bp": "BP. Hỗ trợ hệ thống", "hd": "Hỗ trợ cửa hàng", "mt": "Tiếp nhận, giải đáp và xử lý các vấn đề phát sinh", "dl": "", "gc": ""}, {"id": "30", "grp": "Mở bán", "n": 30, "nguoi": "CV Truyền thông nội bộ", "bp": "Phòng Marketing", "hd": "Truyền thông cho hệ thống cửa hàng", "mt": "Qua kênh Base", "dl": "", "gc": ""}, {"id": "31", "grp": "Ngừng bán", "n": 31, "nguoi": "CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Trao thưởng cửa hàng", "mt": "- Tính bảng thưởng cửa hàng\n- Gửi thông tin thưởng cho cửa hàng\n- Gửi thông tin cho kế toán chuyển thưởng", "dl": "Kết quả thi đua", "gc": "Output"}, {"id": "32", "grp": "Ngừng bán", "n": 32, "nguoi": "CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Báo cáo kết quả kinh doanh", "mt": "", "dl": "Kết quả thực tế / KPIs", "gc": "Output"}, {"id": "33", "grp": "Ngừng bán", "n": 33, "nguoi": "Trưởng phòng Marketing", "bp": "Phòng Marketing", "hd": "Báo cáo kết quả Marketing", "mt": "", "dl": "Kết quả thực tế / KPIs", "gc": "Output"}]}, "C": {"sheet": "Sản phẩm thương mại", "title": "QUY TRÌNH RA MẮT SẢN PHẨM THƯƠNG MẠI", "steps": [{"id": "1", "grp": "Nghiên cứu sản phẩm", "n": 1, "nguoi": "Trưởng phòng nghiên cứu và phát triển (RnD)", "bp": "- Phòng Nghiên cứu và phát triển (RnD)\n- Cửa hàng / Phòng ban có nhu cầu", "hd": "Đề xuất nghiên cứu sản phẩm mới/ cải tiến", "mt": "- RnD soạn kế hoạch, trình CEO duyệt\n- Cửa hàng / Phòng ban nếu có nhu cầu gửi request cho RnD, CEO, QA", "dl": "", "gc": ""}, {"id": "2", "grp": "Nghiên cứu sản phẩm", "n": 2, "nguoi": "Trưởng phòng RnD", "bp": "Phòng RnD", "hd": "Tổ chức thảo luận, đánh giá đề xuất", "mt": "Họp cùng bộ phận đề xuất để đánh giá đề xuất", "dl": "", "gc": ""}, {"id": "3", "grp": "Nghiên cứu sản phẩm", "n": 3, "nguoi": "Trưởng phòng RnD", "bp": "Phòng RnD", "hd": "Lập kế hoạch", "mt": "- Lập kế hoạch triển khai dự án\n- Trình CEO phê duyệt, nếu được duyệt chuyển bước 4", "dl": "Timeline dự án", "gc": ""}, {"id": "4", "grp": "Nghiên cứu sản phẩm", "n": 4, "nguoi": "Trưởng phòng RnD", "bp": "Phòng RnD", "hd": "Lên ý tưởng dự kiến", "mt": "", "dl": "", "gc": ""}, {"id": "5", "grp": "Nghiên cứu sản phẩm", "n": 5, "nguoi": "- Trưởng phòng Cung ứng Nguyên vật liệu\n- Trưởng BP. Kiểm soát chất lượng", "bp": "Phòng Cung ứng Nguyên vật liệu - CWKB\nPhòng Quản lý chất lượng", "hd": "Chuẩn bị nguồn cung và hồ sơ", "mt": "Từ công thức dự kiến của RnD, CWKB tìm hiểu trước nguồn cung, nhà sản xuất và hồ sơ pháp lý", "dl": "", "gc": ""}, {"id": "6", "grp": "Nghiên cứu sản phẩm", "n": 6, "nguoi": "- Trưởng phòng RnD\n- Trưởng phòng Kinh doanh vận hành\n- Trưởng BP. Kiểm soát chất lượng\n- Trưởng phòng Quản lý chất lượng\nCEO\n- PGĐ Vận hành", "bp": "Phòng RnD", "hd": "Thử nếm lần 1,2,3", "mt": "Thử nếm, đánh giá và điều chỉnh sau mỗi lần thử nếm", "dl": "", "gc": ""}, {"id": "7", "grp": "Nghiên cứu sản phẩm", "n": 7, "nguoi": "- Trưởng phòng RnD\n- Trưởng phòng Kinh doanh vận hành\n- Trưởng BP. Kiểm soát chất lượng\n- Trưởng phòng Quản lý chất lượng\nCEO\n- PGĐ Vận hành", "bp": "Phòng RnD", "hd": "Họp thảo luận và duyệt", "mt": "- Giới thiệu sản phẩm\n- CWKB tính giá bán", "dl": "", "gc": ""}, {"id": "8", "grp": "Nghiên cứu sản phẩm", "n": 8, "nguoi": "Trưởng phòng RnD", "bp": "Phòng RnD", "hd": "QA kiểm tra thông tin", "mt": "Đối chiếu và xác nhận thông tin trên hồ sơ nghiên cứu với sản phẩm thực tế", "dl": "", "gc": ""}, {"id": "9", "grp": "Nghiên cứu sản phẩm", "n": 9, "nguoi": "Trưởng phòng RnD", "bp": "Phòng RnD", "hd": "CEO phê duyệt", "mt": "", "dl": "", "gc": ""}, {"id": "10", "grp": "Chuẩn bị mở bán", "n": 10, "nguoi": "Trưởng phòng kinh doanh - CWKB", "bp": "Phòng Kinh doanh - CWKB", "hd": "Gửi thông tin chốt đến các BP liên quan (P. Quản lý chất lượng, P. Kinh doanh vận hành, BP. Đào tạo)", "mt": "Gửi email thông tin", "dl": "- Giá bán cho cửa hàng, giá bán cho khách hàng, giá bán cho các NPP, giá bán trên kênh online\n- Tài liệu giới thiệu sản phẩm", "gc": ""}, {"id": "11", "grp": "Chuẩn bị mở bán", "n": 11, "nguoi": "Trưởng phòng Cung ứng nguyên vật liệu - CWKB", "bp": "Phòng Cung ứng Nguyên vật liệu - CWKB", "hd": "- Gửi giấy tờ công bố sản phẩm\n- Lịch đặt và giao hàng", "mt": "", "dl": "Lịch đặt và giao hàng", "gc": ""}, {"id": "12", "grp": "Chuẩn bị mở bán", "n": 12, "nguoi": "Trưởng phòng Kinh doanh vận hành", "bp": "Phòng Kinh doanh vận hành", "hd": "Kế hoạch kinh doanh sản phẩm mới", "mt": "", "dl": "- Mục tiêu kinh doanh hệ thống (volume, value)\n- Mục tiêu doanh thu hệ thống - điểm hòa doanh thu\n- Dự báo par stock NVL mới trong 7 ngày đầu\n- Kế hoạch B nếu không đạt 60% target 7 ngày đầu\n- Chi phí kế hoạch\n- Chính sách thưởng cửa hàng", "gc": ""}, {"id": "13", "grp": "Chuẩn bị mở bán", "n": 13, "nguoi": "CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Order setup sản phẩm trên máy POS", "mt": "Gửi order cho IT", "dl": "", "gc": ""}, {"id": "14", "grp": "Chuẩn bị mở bán", "n": 14, "nguoi": "CV IT", "bp": "BP. Hỗ trợ hệ thống", "hd": "Setup sản phẩm trên máy POS", "mt": "Setup theo order của CV Kinh doanh", "dl": "Mã sản phẩm", "gc": ""}, {"id": "15", "grp": "Chuẩn bị mở bán", "n": 15, "nguoi": "Trưởng phòng Marketing", "bp": "Phòng Marketing", "hd": "Kế hoạch marketing sản phẩm mới", "mt": "", "dl": "- Code Chương trình bán hàng đa kênh offline, CRM, deli, Khách hàng thành viên, Chính sách hỗ trợ bán hàng\n- Kế hoạch truyền thông sản phẩm mới: kênh truyền thông, chi phí theo kênh, nội dung truyền thông, KPIs truyền thông", "gc": ""}, {"id": "16", "grp": "Chuẩn bị mở bán", "n": 16, "nguoi": "- Trưởng nhóm Trade Marketing\n- Trưởng nhóm nội dung", "bp": "Phòng Marketing", "hd": "Chuẩn bị tài nguyên", "mt": "- Chụp ảnh sản phẩm mới\n- Thiết kế/ Chụp các ấn phẩm truyền thông\n- In ấn\n- Chuyển POSM đến cửa hàng", "dl": "", "gc": ""}, {"id": "17", "grp": "Chuẩn bị mở bán", "n": 17, "nguoi": "CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Gửi thông tin đến BP. HTHT", "mt": "Gửi thông tin cho BP. Hỗ trợ hệ thống để chuyển cho cửa hàng:\n- Kế hoạch số bán theo cửa hàng\n- Chính sách thưởng\n- Mã sản phẩm trên POS\n- Hướng dẫn bán hàng\n- Hướng dẫn trưng bày", "dl": "Kế hoạch dự án", "gc": ""}, {"id": "18", "grp": "Chuẩn bị mở bán", "n": 18, "nguoi": "Trưởng phòng Marketing", "bp": "Phòng Marketing", "hd": "Gửi thông tin đến BP. HTHT", "mt": "Gửi thông tin cho BP. Hỗ trợ hệ thống để chuyển cho cửa hàng:\n- Chương trình bán hàng\n- Các loại POSM và thời gian vận chuyển", "dl": "", "gc": ""}, {"id": "19", "grp": "Chuẩn bị mở bán", "n": 19, "nguoi": "CV Hỗ trợ hệ thống", "bp": "BP. Hỗ trợ hệ thống", "hd": "Gửi thông tin đến cửa hàng", "mt": "Tổng hợp thông tin từ các BP, Phòng ban, sau đó chuyển cho cửa hàng", "dl": "", "gc": ""}, {"id": "20", "grp": "Chuẩn bị mở bán", "n": 20, "nguoi": "CV Đào tạo", "bp": "BP. Đào tạo", "hd": "Đào tạo cửa hàng", "mt": "Đào tạo tập trung và online về pha chế, bán hàng", "dl": "Báo cáo kết quả tham gia đào tạo", "gc": ""}, {"id": "21", "grp": "Chuẩn bị mở bán", "n": 21, "nguoi": "Quản lý khu vực", "bp": "Phòng Kinh doanh vận hành", "hd": "Báo cáo chuẩn bị trước mở bán", "mt": "Xác nhận đã tự đào tạo cho NV, đã nhận đủ POSM, kiểm tra món trên POS, sẵn sàng mở bán", "dl": "", "gc": ""}, {"id": "22", "grp": "Mở bán", "n": 22, "nguoi": "Trưởng phòng Marketing", "bp": "Phòng Marketing", "hd": "Triển khai truyền thông, CTBH", "mt": "- Triển khai truyền thông, CTBH theo kế hoạch\n- Xử lý các vấn đề phát sinh\n- Theo dõi đánh giá đánh giá khách hàng", "dl": "Báo cáo 10 ngày, 30 ngày", "gc": "OUtput"}, {"id": "23", "grp": "Mở bán", "n": 23, "nguoi": "- Quản lý khu vực\n- CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Triển khai bán hàng", "mt": "- Theo dõi tình hình số bán chung và từng cửa hàng AM phụ trách\n- Theo dõi tình hình nhập hàng, cách thức bán hàng\n- Sửa lỗi vận hành\n- Điều chỉnh kế hoạch nếu cần", "dl": "Báo cáo 10 ngày, 30 ngày", "gc": "OUtput"}, {"id": "24", "grp": "Mở bán", "n": 24, "nguoi": "Trưởng phòng Quản lý chất lượng", "bp": "Phòng Quản lý chất lượng", "hd": "Đánh giá chất lượng món, thao tác NVCH, tư vấn bán hàng sau 10 ngày", "mt": "", "dl": "Báo cáo thực trạng", "gc": "OUtput"}, {"id": "25", "grp": "Mở bán", "n": 25, "nguoi": "CV Hỗ trợ hệ thống\nCV IT", "bp": "BP. Hỗ trợ hệ thống", "hd": "Hỗ trợ cửa hàng", "mt": "Tiếp nhận, giải đáp và xử lý các vấn đề phát sinh", "dl": "", "gc": ""}, {"id": "26", "grp": "Mở bán", "n": 26, "nguoi": "CV Truyền thông nội bộ", "bp": "Phòng Marketing", "hd": "Truyền thông cho hệ thống cửa hàng", "mt": "Qua kênh Base", "dl": "", "gc": ""}, {"id": "27", "grp": "Ngừng bán", "n": 27, "nguoi": "CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Trao thưởng cửa hàng", "mt": "- Tính bảng thưởng cửa hàng\n- Gửi thông tin thưởng cho cửa hàng\n- Gửi thông tin cho kế toán chuyển thưởng", "dl": "Kết quả thu đua", "gc": "Output"}, {"id": "28", "grp": "Ngừng bán", "n": 28, "nguoi": "CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Báo cáo kết quả kinh doanh", "mt": "", "dl": "Kết quả thực tế / KPIs", "gc": "Output"}, {"id": "29", "grp": "Ngừng bán", "n": 29, "nguoi": "Trưởng phòng Marketing", "bp": "Phòng Marketing", "hd": "Báo cáo kết quả Marketing", "mt": "", "dl": "Kết quả thực tế / KPIs", "gc": "Output"}]}, "D": {"sheet": "Đánh giá QC", "title": "QUY TRÌNH ĐÁNH GIÁ QC", "steps": [{"id": "1.1", "grp": "Bảng chấm QC", "n": 1, "nguoi": "Chuyên viên QC", "bp": "Phòng Kiểm soát chất lượng", "hd": "- Check cửa hàng", "mt": "- CV QC đến kiểm tra tại cửa hàng vào 1 khung giờ bất kỳ trong 1 ngày bất kỳ trong 1 tháng\n- Chụp ảnh lưu lại bằng chứng, điền kết quả vào file tính điểm\n- Trao đổi lại với QLCH / CĐT\n\nLưu ý: Cửa hàng có điểm trung bình 2 tháng liên tiếp dưới 75%, sẽ tăng tần suất kiểm tra 2 lần/tháng", "dl": "", "gc": ""}, {"id": "1.2", "grp": "Bảng chấm QC", "n": 2, "nguoi": "Chuyên viên QC", "bp": "Phòng Kiểm soát chất lượng", "hd": "- Gửi bảng chấm", "mt": "- Gửi kết quả bảng chấm qua email / gửi qua bechecklist.", "dl": "- Điểm chấm", "gc": ""}, {"id": "1.3", "grp": "Bảng chấm QC", "n": 3, "nguoi": "QLCH / CĐT", "bp": "Cửa hàng", "hd": "- Phản hồi và khắc phục", "mt": "- Cửa hàng phản hồi qua email / bechecklist\n- Cửa hàng có 72h để khắc phục", "dl": "", "gc": ""}, {"id": "2.1", "grp": "Bảng chấm Khách hàng bí mật", "n": 1, "nguoi": "Khách hàng bí mật", "bp": "Phòng Kiểm soát chất lượng", "hd": "- Check cửa hàng\n- Điềm form khảo sát", "mt": "- KHBM đến kiểm tra tại cửa hàng vào 1 khung giờ bất kỳ trong 1 ngày bất kỳ trong 1 tháng\n- Chụp ảnh lưu lại bằng chứng, điền kết quả vào form khảo sát", "dl": "", "gc": ""}, {"id": "2.2", "grp": "Bảng chấm Khách hàng bí mật", "n": 2, "nguoi": "Chuyên viên QC", "bp": "Phòng Kiểm soát chất lượng", "hd": "- Gửi báo cáo KHBM cho cửa hàng", "mt": "- Gửi kết quả bảng chấm qua email / gửi qua bechecklist", "dl": "- Điểm chấm", "gc": ""}, {"id": "2.3", "grp": "Bảng chấm Khách hàng bí mật", "n": 3, "nguoi": "QLCH / CĐT", "bp": "Cửa hàng", "hd": "- Phản hồi và khắc phục", "mt": "- Cửa hàng phản hồi qua email / bechecklist\n- Cửa hàng có 72h để khắc phục", "dl": "", "gc": ""}]}, "E": {"sheet": "Quy trình xử lý khiếu nại", "title": "QUY TRÌNH XỬ LÝ KHIẾU NẠI", "steps": [{"id": "1.1", "grp": "KH đưa ra yêu cầu hỗ trợ tại Cửa hàng hoặc qua các kênh (hotline, Facebook, Tiktok, Zalo OA, Google Maps...).", "n": 1, "nguoi": "NVCH / CSKH", "bp": "", "hd": "Tiếp nhận và làm rõ nhu cầu", "mt": "NVCH/CSKH xác định nhu cầu của KH và phân loại:\n\n- Nếu khách hàng khiếu nại: chuyển sang QT. Xử lý khiếu nại\n- Nếu đủ thông tin để phản hồi KH: chuyển sang Bước 3.\n- Nếu chưa đủ thông tin: chuyển sang Bước 2 và hẹn thời gian phản hồi KH.", "dl": "Nội dung yêu cầu", "gc": ""}, {"id": "1.2", "grp": "KH đưa ra yêu cầu hỗ trợ tại Cửa hàng hoặc qua các kênh (hotline, Facebook, Tiktok, Zalo OA, Google Maps...).", "n": 2, "nguoi": "NVCH / CSKH", "bp": "", "hd": "Tìm kiếm thông tin", "mt": "- Tìm kiếm thông tin trên các văn bản thông báo mà CCP đã ban hành hoặc liên hệ phòng ban liên quan.\n- Với thông tin ngoài tài liệu, quy định đã ban hành: báo cáo và xin ý kiến từ quản lý trực tiếp.", "dl": "", "gc": ""}, {"id": "1.3", "grp": "KH đưa ra yêu cầu hỗ trợ tại Cửa hàng hoặc qua các kênh (hotline, Facebook, Tiktok, Zalo OA, Google Maps...).", "n": 3, "nguoi": "NVCH / CSKH", "bp": "", "hd": "Hỗ trợ", "mt": "- Cung cấp thông tin cho KH.\n- Nếu thông tin KH hỏi về chương trình nhượng quyền, hợp tác…: hướng dẫn KH liên hệ qua hotline/ gửi email về khối văn phòng", "dl": "- Phương án xử lý\n- Thời gian xử lý", "gc": ""}, {"id": "1.4", "grp": "KH đưa ra yêu cầu hỗ trợ tại Cửa hàng hoặc qua các kênh (hotline, Facebook, Tiktok, Zalo OA, Google Maps...).", "n": 4, "nguoi": "NVCH / CSKH", "bp": "", "hd": "Kết thúc", "mt": "- Xác nhận KH đã hài lòng.\n- Trường hợp KH chưa hài lòng, quay lại Bước 2.", "dl": "Mức độ hài lòng", "gc": ""}, {"id": "2.1", "grp": "KH phản ánh trực tiếp với nhân viên/QLCH/TLCH về vấn đề sản phẩm/dịch vụ tại cửa hàng.", "n": 1, "nguoi": "QLCH/TLCH", "bp": "Cửa hàng", "hd": "Tiếp nhận và làm rõ nhu cầu", "mt": "- Khiếu nại cấp 1: đến Bước 3\n- Khiếu nại cấp 2,3,4: đến Bước 1 Quy trình xử lý khiếu nại qua CSKH.", "dl": "Nội dung khiếu nại", "gc": ""}, {"id": "2.2", "grp": "KH phản ánh trực tiếp với nhân viên/QLCH/TLCH về vấn đề sản phẩm/dịch vụ tại cửa hàng.", "n": 2, "nguoi": "QLCH/TLCH", "bp": "Cửa hàng", "hd": "Xử lý tình huống tại điểm & Liên hệ CSKH", "mt": "- Xử lý tình huống theo hướng dẫn đã ban hành\n- Thông báo CSKH thông qua Base Workflow để xử lý theo Quy trình xử lý khiếu nại qua CSKH.", "dl": "- Phương án xử lý\n- Thời gian xử lý", "gc": ""}, {"id": "2.3", "grp": "KH phản ánh trực tiếp với nhân viên/QLCH/TLCH về vấn đề sản phẩm/dịch vụ tại cửa hàng.", "n": 3, "nguoi": "QLCH/TLCH", "bp": "Cửa hàng", "hd": "Giải quyết khiếu nại", "mt": "- Nếu KH hài lòng: kết thúc\n- Nếu KH chưa hài lòng: đề xuất phương án giải quyết khác cho KH.", "dl": "Mức độ hài lòng", "gc": ""}, {"id": "3.1", "grp": "KH khiếu nại qua các kênh thông tin: Facebook, Zalo OA, QR code, Google Maps, hotline hoặc từ nội bộ.", "n": 1, "nguoi": "CSKH", "bp": "Phòng Marketing", "hd": "Tiếp nhận và phân loại", "mt": "- CSKH tiếp nhận và thu thập thông tin như: thời gian, địa điểm, mã đơn hàng, hình ảnh (nếu có).\n- Đánh giá mức độ nghiêm trọng:\n+ Nếu khiếu nại thuộc Cấp 1: chuyển sang Bước 3.\n+ Nếu khiếu nại thuộc Cấp 2,3,4: chuyển sang Bước 2.", "dl": "Nội dung khiếu nại", "gc": ""}, {"id": "3.2", "grp": "KH khiếu nại qua các kênh thông tin: Facebook, Zalo OA, QR code, Google Maps, hotline hoặc từ nội bộ.", "n": 2, "nguoi": "Đại diện cửa hàng (ĐDCH) / Đại diện công ty (ĐDCT)", "bp": "- Cửa hàng\n- Phòng Quản lý chất lượng (QC)", "hd": "Giải trình và điều tra thông tin", "mt": "ĐDCH và ĐDCT thực hiện đồng thời:\n\n- ĐDCH: xác minh sự việc, giải trình nguyên nhân, đề xuất phương án xử lý.\n- QC: kiểm tra các dữ liệu liên quan (camera, phỏng vấn nhân sự,…) để đánh giá nguyên nhân. Đối chiếu với tiêu chuẩn chất lượng để xác định mức độ sai sót và mức độ ảnh hưởng đến KH.", "dl": "", "gc": ""}, {"id": "3.3", "grp": "KH khiếu nại qua các kênh thông tin: Facebook, Zalo OA, QR code, Google Maps, hotline hoặc từ nội bộ.", "n": 3, "nguoi": "CSKH / Ban Giám đốc", "bp": "- Phòng Marketing\n- Ban Giám đốc", "hd": "Phê duyệt phương án & Trao đổi với KH", "mt": "Căn cứ cấp độ khiếu nại đã phân loại tại Bước 1:\n- Nếu khiếu nại thuộc Cấp 1: CSKH phê duyệt phương án và trực tiếp xử lý khiếu nại với KH\n- Nếu khiếu nại thuộc Cấp 2, Cấp 3 hoặc Cấp 4: BGĐ phê duyệt phương án, chỉ định nhân sự phụ trách liên hệ, thực hiện phương án bồi hoàn với KH.", "dl": "- Phương án xử lý\n- Thời gian xử lý", "gc": ""}, {"id": "3.4", "grp": "KH khiếu nại qua các kênh thông tin: Facebook, Zalo OA, QR code, Google Maps, hotline hoặc từ nội bộ.", "n": 4, "nguoi": "CSKH / Đại diện cửa hàng", "bp": "- Phòng Marketing\n- Cửa hàng", "hd": "Báo cáo kết quả", "mt": "Sau khi KH hài lòng, nhân sự phụ trách gửi báo cáo, bao gồm:\n- Hình ảnh tin nhắn trao đổi với KH.\n- Ghi âm cuộc gọi.\n- Các bằng chứng đã thực hiện cam kết (đổi hàng/hoàn tiền/cấp voucher…).\n- Biên bản xử lý vi phạm của cửa hàng vi phạm (nếu có).", "dl": "Mức độ hài lòng", "gc": ""}, {"id": "3.5", "grp": "KH khiếu nại qua các kênh thông tin: Facebook, Zalo OA, QR code, Google Maps, hotline hoặc từ nội bộ.", "n": 5, "nguoi": "CSKH", "bp": "Phòng Marketing", "hd": "Kiểm tra báo cáo", "mt": "Sau khi nhận báo cáo, CSKH thực hiện kiểm tra báo cáo và kết quả thực hiện cam kết và đóng khiếu nại.", "dl": "", "gc": ""}]}, "F": {"sheet": "Quy trình triển khai CTKM", "title": "QUY TRÌNH TRIỂN KHAI CTKM", "steps": [{"id": "1.1", "grp": "CTKM do cửa hàng đề xuất", "n": 1, "nguoi": "Quản lý cửa hàng (QLCH)", "bp": "Cửa hàng", "hd": "Gửi Base Request", "mt": "Chi tiết CTKM muốn triển khai\n- Mục tiêu\n- Chương trình\n- Thời gian\n- Đối tượng áp dụng", "dl": "", "gc": ""}, {"id": "1.2", "grp": "CTKM do cửa hàng đề xuất", "n": 2, "nguoi": "Chủ đầu tư (CĐT)", "bp": "Cửa hàng", "hd": "Phê duyệt", "mt": "CĐT duyệt phương án, chuyển sang bước 3", "dl": "", "gc": ""}, {"id": "1.3", "grp": "CTKM do cửa hàng đề xuất", "n": 3, "nguoi": "Trưởng phòng Kinh doanh vận hành", "bp": "Phòng Kinh doanh vận hành", "hd": "Làm rõ, tư vấn và phê duyệt", "mt": "- Làm rõ, tư vấn thêm về kinh doanh vận hành nếu cầu\n- Duyệt phương án, chi phí hỗ trợ, cách tính phí nhượng quyền, chuyển bước 4", "dl": "", "gc": ""}, {"id": "1.4", "grp": "CTKM do cửa hàng đề xuất", "n": 4, "nguoi": "Trưởng phòng Marketing", "bp": "Phòng Marketing", "hd": "Làm rõ, tư vấn và phê duyệt", "mt": "Duyệt phương án, chi phí hỗ trợ, chuyển sang work flow triển khai", "dl": "", "gc": ""}, {"id": "1.5", "grp": "CTKM do cửa hàng đề xuất", "n": 5, "nguoi": "- Trưởng nhóm nội dung\n- Trưởng nhóm Trade Marketing", "bp": "Phòng Marketing", "hd": "Triển khai CTKM", "mt": "Tùy từng chương trình, triển khai các hạng mục sau:\n- Chụp, thiết kế hình ảnh/ video\n- In ấn, vận chuyển\n- Chạy quảng cáo\n- Order IT setup CTKM", "dl": "", "gc": ""}, {"id": "1.6", "grp": "CTKM do cửa hàng đề xuất", "n": 6, "nguoi": "Trưởng nhóm Trade Marketing", "bp": "Phòng Marketing", "hd": "Gửi thông báo cho HTHT", "mt": "- Gửi thông báo chi tiết chương trình kèm hướng dẫn vận hành", "dl": "- Code chương trình", "gc": ""}, {"id": "1.7", "grp": "CTKM do cửa hàng đề xuất", "n": 7, "nguoi": "CV Hỗ trợ hệ thống", "bp": "BP. Hỗ trợ hệ thống", "hd": "Gửi thông báo đến cửa hàng", "mt": "Qua mail", "dl": "", "gc": ""}, {"id": "1.8", "grp": "CTKM do cửa hàng đề xuất", "n": 8, "nguoi": "Quản lý cửa hàng (QLCH)", "bp": "Cửa hàng", "hd": "Xác nhận triển khai", "mt": "Cửa hàng xác nhận sẵn sàng triển khai\n- Nút bấm trên POS đúng, chĩnh xác\n- POSM", "dl": "", "gc": ""}, {"id": "1.9", "grp": "CTKM do cửa hàng đề xuất", "n": 9, "nguoi": "Trưởng nhóm Trade Marketing", "bp": "Phòng Marketing", "hd": "Báo cáo kết quả", "mt": "Báo cáo kết quả:\n- Hiệu quả CTKM (doanh thu, chi phí, lượt tiếp cận)\n- Thực tế triển khai", "dl": "Output", "gc": ""}, {"id": "2.1", "grp": "CTKM do P. MKT triển khai\n(Chương trình Offline, CRM)", "n": 1, "nguoi": "Trưởng nhóm Trade Marketing", "bp": "Phòng Marketing", "hd": "Lập kế hoạch và chuẩn bị", "mt": "- Lập kế hoạch\n- Chuẩn bị các ấn phẩm POSM, in ấn\n- Order IT setup CTKM, màn hình máy POS", "dl": "", "gc": ""}, {"id": "2.2", "grp": "CTKM do P. MKT triển khai\n(Chương trình Offline, CRM)", "n": 2, "nguoi": "Trưởng nhóm Trade Marketing", "bp": "Phòng Marketing", "hd": "Gửi thông báo cho HTHT", "mt": "Gửi thông báo chương trình cho BP. HTHT. Bao gồm:\n- Nội dung chương trình\n- Thời gian triển khai\n- Cửa hàng áp dụng\n- Kênh áp dụng\n- Chi phí hỗ trợ\n- Hướng dẫn bán hàng", "dl": "- Code chương trình", "gc": ""}, {"id": "2.3", "grp": "CTKM do P. MKT triển khai\n(Chương trình Offline, CRM)", "n": 3, "nguoi": "CV Hỗ trợ hệ thống", "bp": "BP. Hỗ trợ hệ thống", "hd": "Gửi thông báo đến cửa hàng", "mt": "Qua mail", "dl": "", "gc": ""}, {"id": "2.4", "grp": "CTKM do P. MKT triển khai\n(Chương trình Offline, CRM)", "n": 4, "nguoi": "QLCH", "bp": "Cửa hàng", "hd": "Triển khai tại cửa hàng", "mt": "Cửa hàng nhận thông tin triển khai\n- Trưng bày POSM (nếu có)\n- Tư vấn bán hàng theo hướng dẫn\n- Báo cáo nếu có lỗi", "dl": "", "gc": ""}, {"id": "2.5", "grp": "CTKM do P. MKT triển khai\n(Chương trình Offline, CRM)", "n": 5, "nguoi": "Trưởng nhóm Trade Marketing", "bp": "Phòng Marketing", "hd": "Theo dõi triển khai", "mt": "", "dl": "", "gc": ""}, {"id": "2.6", "grp": "CTKM do P. MKT triển khai\n(Chương trình Offline, CRM)", "n": 6, "nguoi": "Trưởng nhóm Trade Marketing", "bp": "Phòng Marketing", "hd": "Báo cáo triển khai", "mt": "", "dl": "Output", "gc": ""}, {"id": "3.1", "grp": "CTKM do P. Kinh doanh vận hành triển khai\n(Chương trình kênh giao hàng)", "n": 1, "nguoi": "CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Lập kế hoạch và chuẩn bị", "mt": "- Lập kế hoạch\n- Order IT setup CTKM\n- Order Marketing thiết kế hình ảnh, quảng cáo nếu có", "dl": "", "gc": ""}, {"id": "3.2", "grp": "CTKM do P. Kinh doanh vận hành triển khai\n(Chương trình kênh giao hàng)", "n": 2, "nguoi": "CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Gửi thông báo cho HTHT", "mt": "Gửi thông báo chương trình cho BP. HTHT. Bao gồm:\n- Nội dung chương trình\n- Thời gian triển khai\n- Cửa hàng áp dụng\n- Kênh áp dụng\n- Chi phí hỗ trợ", "dl": "- Chương trình triển khai\n- Các hoạt động truyền thông", "gc": ""}, {"id": "3.3", "grp": "CTKM do P. Kinh doanh vận hành triển khai\n(Chương trình kênh giao hàng)", "n": 3, "nguoi": "CV Hỗ trợ hệ thống", "bp": "BP. Hỗ trợ hệ thống", "hd": "Gửi thông báo đến cửa hàng", "mt": "Qua mail", "dl": "", "gc": ""}, {"id": "3.4", "grp": "CTKM do P. Kinh doanh vận hành triển khai\n(Chương trình kênh giao hàng)", "n": 4, "nguoi": "QLCH", "bp": "Cửa hàng", "hd": "Triển khai tại cửa hàng", "mt": "Cửa hàng nhận thông tin triển khai:\n- Check thông tin trên ứng dụng giao hàng đã đúng đủ chưa\n- Triển khai theo chương trình đã thông báo\n- Báo cáo nếu có lỗi", "dl": "", "gc": ""}, {"id": "3.5", "grp": "CTKM do P. Kinh doanh vận hành triển khai\n(Chương trình kênh giao hàng)", "n": 5, "nguoi": "CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Theo dõi triển khai", "mt": "", "dl": "", "gc": ""}, {"id": "3.6", "grp": "CTKM do P. Kinh doanh vận hành triển khai\n(Chương trình kênh giao hàng)", "n": 6, "nguoi": "CV Kinh doanh", "bp": "Phòng Kinh doanh vận hành", "hd": "Báo cáo triển khai", "mt": "", "dl": "Kết quả chương trình", "gc": ""}]}};
+const G=6, LABW=132, COLW=360, NW=144, HEADH=46, ROWH=66, TOPPAD=12, POSX={L:24,R:192,C:108}, INF=4;
+const CASED={D:1,E:1,F:1};
+const cv=document.getElementById('cv'), lanecol=document.getElementById('lanecol');
+// lane rows
+const rows={}; LANES.forEach(l=>rows[l[0]]=1);
+NODES.forEach(n=>rows[n.l]=Math.max(rows[n.l],n.r+1));
+const laneY={}; let y=HEADH+14;
+LANES.forEach(l=>{laneY[l[0]]=y; y+=rows[l[0]]*ROWH+TOPPAD;});
+const H=y+12, W=COLS.length*COLW+8;
+cv.style.width=W+'px'; cv.style.height=H+'px';
+// lane column
+const lh=document.createElement('div'); lh.className='lanehead'; lh.style.height=HEADH-6+'px'; lh.style.width=LABW-14+'px';
+lh.textContent='Phòng ban / Bộ phận'; lanecol.appendChild(lh);
+lanecol.style.width=LABW+'px';
+const sp=document.createElement('div'); sp.style.height=(laneY[LANES[0][0]]-HEADH-8+0)+'px'; lanecol.appendChild(sp);
+LANES.forEach((l,i)=>{
+  const d=document.createElement('div'); d.className='lab'; d.style.width=LABW-14+'px';
+  d.style.height=(rows[l[0]]*ROWH+TOPPAD)+'px';
+  d.innerHTML='<b></b>'+(l[2]?'<span></span>':''); d.querySelector('b').textContent=l[1];
+  if(l[2]) d.querySelector('span').textContent=l[2];
+  lanecol.appendChild(d);
+  const b=document.createElement('div'); b.className='band';
+  b.style.cssText=`top:${laneY[l[0]]}px;height:${rows[l[0]]*ROWH+TOPPAD}px;width:${W}px;background:${i%2?'var(--lane-b)':'var(--lane-a)'};border-bottom:1px solid var(--rule)`;
+  cv.appendChild(b);
+});
+// headers + dividers — hàng tiêu đề nghiệp vụ nằm trong dải dính (sticky) để luôn hiện khi cuộn xuống
+const hs=document.createElement('div'); hs.className='colhead'; hs.style.cssText=`height:${HEADH+8}px;width:${W}px`; cv.prepend(hs);
+COLS.forEach((c,i)=>{
+  const h=document.createElement('div'); h.className='chev';
+  h.style.cssText=`left:${i*COLW+(i?-6:0)}px;top:8px;width:${COLW+(i?8:2)}px;height:${HEADH-6}px`;
+  h.textContent=c[1]; hs.appendChild(h);
+  if(i){const dv=document.createElement('div'); dv.className='coldiv'; dv.style.cssText=`left:${i*COLW}px;top:${HEADH+14}px;height:${H-HEADH-26}px`; cv.appendChild(dv);}
+});
+const svg=document.createElementNS('http://www.w3.org/2000/svg','svg'); svg.classList.add('edges');
+svg.setAttribute('width',W); svg.setAttribute('height',H);
+svg.innerHTML='<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--edge)" stroke="none"/></marker><marker id="ahh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--focus)" stroke="none"/></marker></defs>';
+cv.appendChild(svg);
+// ---------- báo cáo Power BI gắn vào bước ----------
+const PBI='https://app.powerbi.com/groups/102a63a7-8a8b-4d2d-aa5b-14cddf2536ce/reports/';
+const REPORTS={
+  DT:{ten:'Báo cáo Doanh thu (VER 2)',id:'c1df22e3-e103-4f6d-86d1-95ddad63211a',mau:'#1F6FB2',mt:'Doanh thu, hóa đơn, giá trị TB, giảm giá, hoa hồng kênh theo cửa hàng / kênh / thời gian'},
+  SP:{ten:'Báo cáo Sản phẩm (VER 2)',id:'5e162374-ec84-49df-ae01-2ef881d750f0',mau:'#8A8F2E',mt:'Số bán, doanh thu theo sản phẩm / nhóm / cửa hàng / kênh; sản phẩm bán qua CTKM, KHTV mua sản phẩm'},
+  ME:{ten:'Báo cáo Menu Engineering',id:'24d1b7ba-8ac8-4f96-99a2-cbd4064f6b39',grp:'49b28dd8-95de-4ce4-a97f-90b3eefa17cd',mau:'#55642C',mt:'Ma trận menu 4 nhóm, giá vốn – GM, kịch bản giả lập giá bán / giá NVL, dự toán lượng bán & NVL 3 tháng, mua kèm'},
+  KH:{ten:'Báo cáo Khách hàng (VER 2)',id:'47477b35-8405-4ad3-bf6a-cebe182850ba',mau:'#7A4FA3',mt:'Khách hàng thành viên (KHTV): số KH, KH mới, doanh thu KHTV, RFM'},
+  RT:{ten:'Báo cáo Retention (VER 2)',id:'afaf426c-a38c-4d73-9bdb-422dda3da89c',mau:'#A3488A',mt:'Tỷ lệ KH quay lại, cohort giữ chân theo tháng, KH mới có hóa đơn thứ 2'},
+  RD:{ten:'Báo cáo Redemption',id:'d99fab65-b1f4-4daf-9cec-ef14d017cf56',mau:'#B5652B',mt:'Voucher CRM phát hành / sử dụng, tỷ lệ redeem, % markdown'},
+  MK:{ten:'Báo cáo Marketing',id:'31c5a328-f84d-4d1c-9f62-50ddf940c10c',mau:'#C2403A',mt:'Hiệu quả CTKM: doanh thu, chi phí, ROI, voucher, tỷ trọng DT CTKM'},
+  RA:{ten:'Báo cáo Radar (tổng quan BOD)',id:'395a46b7-c91c-4e61-a91c-649dd4c1f05b',mau:'#2E7D6B',mt:'Key metric tổng cho BOD; điểm chấm QC (BeChecklist) và đào tạo (LMS) theo blueprint'},
+  // Google Sheet (không phải Power BI): link về thư mục báo cáo trên Drive
+  KHO:{ten:'Báo cáo kho (Google Sheet)',url:'https://drive.google.com/drive/folders/1J4UvH7VUQJOrHz-RT2jO7fiJnwnWYdDC',mau:'#6D4C41',mt:'Sổ kho / sổ bar, tồn NVL & SPTM, định mức hao hụt, SL cần order dự kiến đủ 1 tuần, số ngày còn hàng'},
+  NS:{ten:'Báo cáo nhân sự (Google Sheet)',url:'https://drive.google.com/drive/folders/1J4UvH7VUQJOrHz-RT2jO7fiJnwnWYdDC',mau:'#0E7490',mt:'Danh sách nhân sự, đăng ký và xếp ca, lịch tuần, định biên theo khung giờ (CTNS), hiệu suất giờ công, lương theo giờ'}
+};
+// trang Menu Engineering trong báo cáo Sản phẩm
+const ME={muakem:'b81c3d5e7f90a2b4c6d8',matran:'c4d2498e1242de7bbd4c',kichban:'63b79ecb80292da64ba2',dutoan:'a7d04f1e9c2b4e8d5f31',toancanh:'deb8128d26ba5ce0fc0c'};
+// bước → [mã báo cáo, xem gì, trang (tuỳ chọn)]
+const RP={
+  a7:[['KHO','Danh mục NVL, CCDC, SPTM và định mức để lên order đầu tiên cho cửa hàng mới']],
+  a8:[['NS','Định biên nhân sự chuẩn theo khung giờ (CTNS) và giờ công cần cho cửa hàng']],
+  a18:[['KHO','Tồn NVL và lượng cần cung ứng theo order của cửa hàng']],
+  a19:[['NS','Danh sách nhân sự, lương theo giờ; đăng ký và xếp ca khi nhân sự mới vào làm']],
+  c10:[['KHO','Tồn SPTM tại cửa hàng, SL cần order dự kiến đủ 1 tuần để lên lịch đặt – giao']],
+  a1:[['DT','Doanh thu, doanh thu/CH của các cửa hàng hiện có cùng khu vực / cùng loại mặt bằng để ước tính tiềm năng địa điểm']],
+  a4:[['DT','Doanh thu thực tế những tháng đầu so với dự toán khi duyệt dự án']],
+  a11:[['DT','Doanh thu, số hóa đơn 2 tuần đầu sau khai trương; so với cửa hàng cùng khu vực'],['RT','Tỷ lệ khách mới quay lại (có hóa đơn thứ 2) sau khai trương']],
+  a13:[['MK','Kết quả CTKM khai trương: doanh thu, chi phí, ROI'],['KH','Số khách thành viên mới đăng ký trong đợt khai trương']],
+  a15:[['RA','Kết quả đào tạo nhân sự (LMS) trên báo cáo tổng']],
+  b19:[['ME','Cặp món hay được mua kèm để thiết kế combo / gợi ý bán thêm cho món mới','muakem']],
+  b1:[['ME','Ma trận menu: món Chó mực / Dấu hỏi cần thay thế hoặc khoảng trống trong menu','matran']],
+  b5:[['ME','Giá vốn, GM của món tương tự; giả lập GM theo giá NVL','kichban']],
+  b9:[['ME','Dự toán lượng bán và định lượng / giá trị NVL cần chuẩn bị 3 tháng tới','dutoan'],['KHO','Tồn NVL hiện có, số ngày còn hàng để biết cần order thêm bao nhiêu']],
+  b11:[['ME','Kịch bản giả lập: tác động của giá bán lên GM toàn menu','kichban']],
+  b15:[['ME','Dự toán lượng bán 3 tháng tới làm căn cứ target và par stock','dutoan'],['KHO','Par stock 7 ngày: SL cần order dự kiến đủ 1 tuần theo tồn hiện có']],
+  b20:[['RA','Kết quả đào tạo cửa hàng (LMS)']],
+  b23:[['MK','Báo cáo 10/30 ngày: doanh thu, chi phí, ROI của CTBH món mới']],
+  b24:[['ME','Vị trí món mới trên ma trận menu (lãi cao hay thấp, bán tốt hay kém)','matran'],['SP','Số bán và doanh thu món mới theo cửa hàng / kênh']],
+  b28:[['MK','KPIs Marketing thực tế của đợt ra mắt']],
+  c1:[['SP','Số bán, doanh thu nhóm sản phẩm thương mại hiện có']],
+  c11:[['SP','Số bán sản phẩm thương mại tương tự để đặt target, par stock'],['KHO','Par stock 7 ngày của SPTM theo tồn hiện có']],
+  c16:[['RA','Kết quả đào tạo cửa hàng (LMS)']],
+  c19:[['MK','Báo cáo 10/30 ngày: hiệu quả CTBH sản phẩm thương mại']],
+  c20:[['SP','Số bán sản phẩm thương mại theo cửa hàng sau khi mở bán'],['DT','Doanh thu theo cửa hàng / kênh']],
+  c23:[['MK','KPIs Marketing thực tế']],
+  d3:[['RA','Điểm chấm QC / KHBM (BeChecklist) theo cửa hàng']],
+  d5:[['RA','Điểm trung bình 2 tháng của cửa hàng để xét ngưỡng 75%']],
+  f5:[['DT','Doanh thu từ CTKM, chi phí giảm giá, hoa hồng kênh giao hàng'],['MK','ROI, tỷ trọng chi phí / doanh thu CTKM']],
+  f7:[['KH','Chọn tệp khách thành viên theo RFM / tần suất'],['RD','Tỷ lệ redeem voucher các đợt trước để dự kiến số voucher']],
+  f9:[['MK','Doanh thu, chi phí, ROI của chương trình'],['RD','Voucher phát hành / sử dụng, tỷ lệ redeem, % markdown'],['RT','Khách quay lại sau chương trình CRM'],['KH','Doanh thu và số khách thành viên tham gia']]
+};
+const rpUrl=(k,pg)=>{const R=REPORTS[k]; if(R.url) return R.url;
+  const base=R.grp?'https://app.powerbi.com/groups/'+R.grp+'/reports/':PBI;
+  return base+R.id+(pg?'/'+ME[pg]:'')+'?experience=power-bi';};
+function rk(k){const s=document.createElement('span');s.className='rk';s.style.background=REPORTS[k].mau;s.textContent=k;s.title=REPORTS[k].ten;return s;}
+// chỉ số trùng giữa các báo cáo (từ sheet "Tổng hợp chỉ số" – CCP x Base 2026 Projects); p = số trùng ÷ số chỉ số của báo cáo nhỏ hơn
+const NCS={RA:41,DT:49,SP:47,RT:25,MK:17,RD:7,KH:18};
+const OV=[
+  {a:'MK',b:'RD',n:4,p:.57,ct:'% Markdown, Tỉ lệ redeem, Tổng số voucher phát hành, Tổng số voucher đã sử dụng'},
+  {a:'RA',b:'DT',n:14,p:.34,ct:'Doanh số, DT sau GG, DT thực thu, DT sự kiện, DT dịch vụ, DT từ CTKM, DT tự nhiên, DT/CH, CP giảm giá, hoa hồng kênh, số hóa đơn, giá trị TB…'},
+  {a:'DT',b:'KH',n:6,p:.33,ct:'Doanh thu KHTV, Tổng số KHTV, KHTV mới, KHTV phát sinh chi tiêu, KHTV rời bỏ, CP giảm giá'},
+  {a:'SP',b:'KH',n:4,p:.22,ct:'Số KHTV mua trong kỳ, Số lượng bán KHTV, Số đơn từ KHTV, CP giảm giá'},
+  {a:'RA',b:'SP',n:8,p:.20,ct:'Doanh số, DT sau GG, DT thực thu, DT từ CTKM, DT tự nhiên, Markdown, CP giảm giá, Tổng số hóa đơn'},
+  {a:'DT',b:'SP',n:8,p:.17,ct:'Doanh số, DT sau GG, DT thực thu, DT từ CTKM, DT tự nhiên, Số lượng SP bán, CP giảm giá, Tổng số hóa đơn'},
+  {a:'RT',b:'KH',n:3,p:.17,ct:'Số HĐ TB / KH mới, Số HĐ TB / tháng / thành viên, KHTV phát sinh chi tiêu'}
+];
+const CANBC=n=>n.k==='o'||(n.k==='d'&&/[<>≤≥%]/.test(n.t));   // bước cần số liệu: đầu ra / kết quả, điểm quyết định theo ngưỡng số
+const NHIEU=3;                                            // từ 3 báo cáo trở lên trên 1 bước = cần xem lại để tinh gọn
+const rpOf=n=>[...new Set((RP[n.id]||[]).map(r=>r[0]))];
+// chọn NHIỀU báo cáo: bước dùng ít nhất 1 báo cáo đang chọn được làm nổi
+const RSEL=new Set(); let COV=false;
+function apply(){
+  document.querySelectorAll('.rpc').forEach(b=>b.setAttribute('aria-pressed',String(RSEL.has(b.dataset.k))));
+  document.getElementById('rpclr').style.display=RSEL.size?'':'none';
+  NODES.forEach(n=>{
+    const ks=rpOf(n), hit=RSEL.size>0&&ks.some(k=>RSEL.has(k));
+    n.el.classList.toggle('rdim',RSEL.size>0&&!hit); n.el.classList.toggle('rhit',hit);
+    const c0=COV&&!ks.length&&CANBC(n), cn=COV&&ks.length>=NHIEU;
+    n.el.classList.toggle('cv0',c0); n.el.classList.toggle('cvn',cn); n.el.classList.toggle('cvx',COV&&!c0&&!cn&&!ks.length);
+    n.el.querySelector('.cvt').textContent=c0?'Chưa có BC':(cn?ks.length+' BC':'');
+  });
+  document.getElementById('cvleg').classList.toggle('on',COV);
+}
+function rpFilter(k){RSEL.has(k)?RSEL.delete(k):RSEL.add(k);apply();}
+(function(){
+  const bar=document.getElementById('rpbar');
+  Object.keys(REPORTS).forEach(k=>{
+    const n=Object.values(RP).filter(a=>a.some(r=>r[0]===k)).length;
+    const b=document.createElement('button');b.type='button';b.className='rpc';b.dataset.k=k;b.setAttribute('aria-pressed','false');
+    b.title=REPORTS[k].mt+' — bấm để chọn / bỏ chọn (chọn được nhiều báo cáo)';
+    const nh=REPORTS[k].ten.replace(/^Báo cáo /,'').replace(/ – gồm Menu Engineering/,' + ME');
+    b.append(rk(k),document.createTextNode(nh.charAt(0).toUpperCase()+nh.slice(1)));
+    const c=document.createElement('span');c.className='n';c.textContent=n+' bước';b.appendChild(c);
+    b.onclick=()=>rpFilter(k); bar.appendChild(b);
+  });
+  const mk=(id,t,f,tt)=>{const b=document.createElement('button');b.type='button';b.className='act';b.id=id;b.textContent=t;b.title=tt||'';b.onclick=f;return b;};
+  const clr=mk('rpclr','✕ Bỏ chọn',()=>{RSEL.clear();apply();}); clr.style.display='none';
+  const sp=document.createElement('span');sp.className='sep';
+  const cov=mk('rpcov','Độ phủ báo cáo',ev=>{COV=!COV;ev.currentTarget.setAttribute('aria-pressed',String(COV));apply();},
+    'Đỏ = đầu ra / quyết định theo số liệu chưa có báo cáo; cam = bước có từ '+NHIEU+' báo cáo trở lên');
+  cov.setAttribute('aria-pressed','false');
+  const th=mk('rpth','Tổng hợp theo nghiệp vụ',()=>openTongHop());
+  const lg=document.createElement('span');lg.className='cvleg';lg.id='cvleg';
+  lg.innerHTML='<span><i style="background:#D23B3B"></i>Chưa có báo cáo</span><span><i style="background:#E08A00"></i>Từ '+NHIEU+' báo cáo – xem lại để tinh gọn</span>';
+  bar.append(clr,sp,cov,th,lg);
+})();
+// bảng tổng hợp độ phủ báo cáo theo mảng nghiệp vụ (mở trong khung bên phải)
+function openTongHop(){
+  document.getElementById('dk').textContent='Độ phủ báo cáo Power BI';
+  document.getElementById('dt').textContent='Tổng hợp theo mảng nghiệp vụ';
+  const db=document.getElementById('db'); db.innerHTML='';
+  const sec=(t)=>{const s=document.createElement('div');s.className='rpsec';const h=document.createElement('h4');h.textContent=t;s.appendChild(h);db.appendChild(s);return s;};
+  const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  // 1. theo mảng
+  let h='<table class="th"><tr><th>Mảng</th><th class="n">Bước</th><th class="n">Có BC</th><th class="n">Đầu ra chưa có BC</th><th class="n">Bước ≥'+NHIEU+' BC</th><th>Báo cáo dùng</th></tr>';
+  const thieu=[], nhieu=[];
+  COLS.forEach(([c,ten])=>{
+    const ns=NODES.filter(n=>n.c===c), co=ns.filter(n=>rpOf(n).length);
+    const t0=ns.filter(n=>!rpOf(n).length&&CANBC(n)), tn=ns.filter(n=>rpOf(n).length>=NHIEU);
+    t0.forEach(n=>thieu.push([ten,n])); tn.forEach(n=>nhieu.push([ten,n]));
+    const ks=[...new Set(ns.flatMap(rpOf))];
+    h+='<tr><td><b>'+esc(ten)+'</b></td><td class="n">'+ns.length+'</td><td class="n">'+co.length+'</td><td class="n '+(t0.length?'bad':'')+'">'+t0.length+'</td><td class="n '+(tn.length?'warn':'')+'">'+tn.length+'</td><td>'+(ks.length?ks.map(k=>'<span class="rk" style="background:'+REPORTS[k].mau+'">'+k+'</span>').join(' '):'<span class="bad">chưa có</span>')+'</td></tr>';
+  });
+  sec('Theo mảng nghiệp vụ').insertAdjacentHTML('beforeend',h+'</table><div class="sub">"Đầu ra chưa có BC" = ô Đầu ra / Kết quả hoặc điểm quyết định theo ngưỡng số liệu mà chưa gắn báo cáo nào.</div>');
+  // 2. thiếu báo cáo
+  const s2=sec('Nghiệp vụ chưa có báo cáo ('+thieu.length+' bước)');
+  s2.insertAdjacentHTML('beforeend','<ul>'+thieu.map(([m,n])=>'<li><b>'+esc(m)+'</b> · '+esc(n.t)+(n.s?' <span class="sub">('+esc(n.s)+')</span>':'')+'</li>').join('')+'</ul>'+
+    '<div class="sub" style="margin-top:6px">Đã có nguồn nhưng chưa có báo cáo dùng chung: Báo cáo CSKH (khiếu nại, CSAT, NPS – đang là file pbix), Báo cáo QC/KHBM (đang chờ). Báo cáo kho và nhân sự là Google Sheet theo từng cửa hàng.</div>');
+  // 3. nhiều báo cáo
+  const s3=sec('Bước có từ '+NHIEU+' báo cáo trở lên – nên tinh gọn ('+nhieu.length+')');
+  s3.insertAdjacentHTML('beforeend','<ul>'+nhieu.map(([m,n])=>'<li><b>'+esc(m)+'</b> · '+esc(n.t)+' — '+rpOf(n).map(k=>'<span class="rk" style="background:'+REPORTS[k].mau+'">'+k+'</span>').join(' ')+'</li>').join('')+'</ul>');
+  // 4. trùng chỉ số giữa báo cáo
+  let t='<table class="th"><tr><th>Cặp báo cáo</th><th class="n">Chỉ số trùng</th><th>Chỉ số</th></tr>';
+  OV.forEach(o=>{t+='<tr><td><span class="rk" style="background:'+REPORTS[o.a].mau+'">'+o.a+'</span> + <span class="rk" style="background:'+REPORTS[o.b].mau+'">'+o.b+'</span></td><td class="n '+(o.p>=.3?'warn':'')+'">'+o.n+' ('+Math.round(o.p*100)+'%)</td><td class="sub">'+esc(o.ct)+'</td></tr>';});
+  sec('Chỉ số trùng giữa các báo cáo').insertAdjacentHTML('beforeend',t+'</table><div class="sub">% = số chỉ số trùng ÷ số chỉ số của báo cáo nhỏ hơn trong cặp. Từ 30% trở lên (màu cam) nên cân nhắc gộp hoặc bỏ phần trùng. Nguồn: sheet "Tổng hợp chỉ số".</div>'+
+    '<ul><li><b>Redemption</b>: 4/7 chỉ số đã có trong Marketing → cân nhắc gộp thành 1 trang trong báo cáo Marketing.</li><li><b>Radar ↔ Doanh thu</b>: 14 chỉ số doanh thu trùng → Radar chỉ nên giữ chỉ số tổng cho BOD, chi tiết xem ở Doanh thu.</li><li><b>Khách hàng ↔ Doanh thu</b>: nhóm chỉ số KHTV trùng → thống nhất để ở báo cáo Khách hàng.</li></ul>');
+  if(selEl){selEl.classList.remove('sel');selEl=null;} highlight(null);
+  dr.classList.add('on'); dr.setAttribute('aria-hidden','false');
+}
+// nodes
+const byId={};
+function badge(n){
+  if(!n.refs.length) return '';
+  if(CASED[n.c]){
+    const g={}; n.refs.forEach(r=>{const [a,b]=r.split('.'); (g[a]=g[a]||[]).push(+b);});
+    return Object.entries(g).map(([a,b])=>'TH'+a+'·B'+rng(b)).join(' | ');
+  }
+  return 'B'+rng(n.refs.map(Number));
+}
+function rng(a){a=[...new Set(a)].sort((x,y)=>x-y);const o=[];let s=a[0],p=a[0];
+  for(let i=1;i<=a.length;i++){if(a[i]===p+1){p=a[i];continue;} o.push(s===p?''+s:(p===s+1?s+','+p:s+'–'+p)); s=p=a[i];} return o.join(',');}
+NODES.forEach(n=>{
+  const el=document.createElement('button'); el.type='button'; el.className='node '+n.k;
+  const ci=COLS.findIndex(c=>c[0]===n.c);
+  const x=ci*COLW+POSX[n.p], yy=laneY[n.l]+TOPPAD+n.r*ROWH;
+  el.style.left=x+'px'; el.style.top=yy+'px'; el.style.width=NW+'px';
+  if(n.k==='d'){el.style.height='54px';}
+  const bg=n.k==='d'?'':badge(n);
+  el.innerHTML='<div class="t"></div>'+(bg?'<span class="bd"></span>':'');
+  el.querySelector('.t').textContent=n.t;
+  if(bg) el.querySelector('.bd').textContent=bg;
+  const rps=RP[n.id]||[];
+  const cvt=document.createElement('span');cvt.className='cvt';el.appendChild(cvt);
+  if(rps.length){const w=document.createElement('span');w.className='rps';[...new Set(rps.map(r=>r[0]))].forEach(k=>w.appendChild(rk(k)));el.appendChild(w);}
+  el.setAttribute('aria-label',n.t+(bg?' ('+bg+')':'')+(rps.length?' – báo cáo: '+rps.map(r=>REPORTS[r[0]].ten).join(', '):''));
+  el.addEventListener('click',()=>openDrawer(n,el));
+  el.addEventListener('mouseenter',()=>{if(!selEl)highlight(n.id);}); el.addEventListener('mouseleave',()=>{if(!selEl)highlight(null);});
+  el.addEventListener('focus',()=>{if(!selEl)highlight(n.id);}); el.addEventListener('blur',()=>{if(!selEl)highlight(null);});
+  cv.appendChild(el); n.el=el; n.ci=ci; n.x=x; n.y=yy; byId[n.id]=n;
+});
+function measure(){NODES.forEach(n=>{n.w=NW; if(!n.h) n.h=n.el.offsetHeight;});}
+// ---------- router (channel based: no edge crosses a node) ----------
+const CH={left:[12,7,17,3],mid:[180,175,185,171],right:[348,343,353,339]};
+function cxOf(n){return n.x+NW/2;}
+function cyOf(n){return n.k==='d'?n.y+27:n.y+n.h/2;}
+function box(n){return n.k==='d'?{x:n.x+NW/2-33,y:n.y+27-33,w:66,h:66}:{x:n.x,y:n.y,w:NW,h:n.h};}
+function between(a,b){ // any node of same column overlapping the vertical band between a and b
+  const x0=cxOf(a)-20,x1=cxOf(a)+20, ra=box(a), rb=box(b);
+  const y0=Math.min(ra.y+ra.h,rb.y+rb.h), y1=Math.max(ra.y,rb.y);
+  return NODES.some(n=>n!==a&&n!==b&&n.ci===a.ci&&(()=>{const r=box(n);return r.x<x1&&r.x+r.w>x0&&r.y<y1&&r.y+r.h>y0;})());
+}
+function plan(e){
+  const a=byId[e.f], b=byId[e.t];
+  if(e.fs==='t'&&e.ts==='t') return {type:'loop',a,b,fs:'t',ts:'t'};
+  if(a.l===b.l&&a.r===b.r) return {type:'h',a,b,fs:cxOf(b)>cxOf(a)?'r':'l',ts:cxOf(b)>cxOf(a)?'l':'r'};
+  const down=cyOf(b)>cyOf(a);
+  if(Math.abs(cxOf(a)-cxOf(b))<2&&!between(a,b)) return {type:'v',a,b,fs:down?'b':'t',ts:down?'t':'b'};
+  let pa=a.p,pb=b.p; if(pa==='C')pa=(pb==='C'?'R':pb); if(pb==='C')pb=pa;
+  if(pa===pb){const s=pa==='L'?'l':'r'; return {type:'c',ch:pa==='L'?'left':'right',a,b,fs:s,ts:s};}
+  return {type:'c',ch:'mid',a,b,fs:pa==='L'?'r':'l',ts:pb==='L'?'r':'l'};
+}
+function portPt(n,side,off){const r=box(n),cx=cxOf(n),cy=cyOf(n);
+  if(n.k==='d'){ if(side==='t')return[cx,r.y]; if(side==='b')return[cx,r.y+r.h]; if(side==='l')return[r.x,cy]; return[r.x+r.w,cy]; }
+  if(side==='t')return[cx+off,r.y]; if(side==='b')return[cx+off,r.y+r.h]; if(side==='l')return[r.x,cy+off]; return[r.x+r.w,cy+off];}
+function drawEdges(){
+  measure();
+  [...svg.querySelectorAll('path.e,g.elb')].forEach(x=>x.remove());
+  const P=EDGES.filter(e=>SHOWD||!e.d).map(e=>Object.assign(plan(e),{e}));
+  // distribute ports on shared sides
+  const groups={};
+  P.forEach(p=>{[['a',p.fs,p.b],['b',p.ts,p.a]].forEach(([w,s,o])=>{const n=p[w];const k=n.id+s;(groups[k]=groups[k]||[]).push({p,w,o,s});});});
+  Object.values(groups).forEach(g=>{
+    const vert=(g[0].s==='t'||g[0].s==='b');
+    g.sort((u,v)=>vert?(cxOf(u.o)-cxOf(v.o))||(cyOf(u.o)-cyOf(v.o)):(cyOf(u.o)-cyOf(v.o))||(cxOf(u.o)-cxOf(v.o)));
+    const step=vert?18:10, m=g.length;
+    g.forEach((it,i)=>{it.p[it.w+'off']=(i-(m-1)/2)*step;});
+  });
+  // channel tracks
+  const tracks={};
+  P.forEach(p=>{p.p0=portPt(p.a,p.fs,p.aoff||0); p.p3=portPt(p.b,p.ts,p.boff||0);});
+  P.filter(p=>p.type==='c').sort((u,v)=>Math.min(u.p0[1],u.p3[1])-Math.min(v.p0[1],v.p3[1])).forEach(p=>{
+    const k=p.a.ci+p.ch; const T=tracks[k]=tracks[k]||[[],[],[],[]];
+    const y0=Math.min(p.p0[1],p.p3[1])-4,y1=Math.max(p.p0[1],p.p3[1])+4;
+    let ti=T.findIndex(iv=>iv.every(([s,t])=>t<y0||s>y1)); if(ti<0)ti=0;
+    T[ti].push([y0,y1]); p.cx=p.a.ci*COLW+CH[p.ch][ti];
+  });
+  const labels=[];
+  P.forEach(p=>{
+    const [x0,y0]=p.p0,[x3,y3]=p.p3; let pts;
+    if(p.type==='c') pts=[[x0,y0],[p.cx,y0],[p.cx,y3],[x3,y3]];
+    else if(p.type==='h'){const xm=(x0+x3)/2; pts=[[x0,y0],[xm,y0],[xm,y3],[x3,y3]];}
+    else if(p.type==='v'){const ym=(y0+y3)/2; pts=[[x0,y0],[x0,ym],[x3,ym],[x3,y3]];}
+    else {const yt=Math.min(y0,y3)-12; pts=[[x0,y0],[x0,yt],[x3,yt],[x3,y3]];}
+    pts=pts.filter((q,i)=>i===0||q[0]!==pts[i-1][0]||q[1]!==pts[i-1][1]);
+    const path=document.createElementNS(svg.namespaceURI,'path');
+    path.setAttribute('d',pathD(pts)); path.setAttribute('class','e'+(p.e.d?' ds':'')); path.setAttribute('marker-end','url(#ah)'); path.dataset.f=p.e.f; path.dataset.t=p.e.t;
+    svg.appendChild(path);
+    if(p.e.lb){
+      if(p.type==='c') labels.push({x:p.cx,y:(y0+y3)/2,t:p.e.lb,rot:true});
+      else if(p.type==='v') labels.push({x:x0,y:(y0+y3)/2,t:p.e.lb,side:true});
+      else if(p.type==='h'){ if(p.a.k==='d') labels.push({x:(x0+x3)/2,y:y0-9,t:p.e.lb}); }
+      else labels.push({x:(x0+x3)/2,y:Math.min(y0,y3)-12,t:p.e.lb});
+    }
+    const ll=labels[labels.length-1]; if(ll&&!ll._p) Object.assign(ll,{_p:1,ef:p.e.f,et:p.e.t,opt:p.a.k!=='d'});
+  });
+  labels.forEach(l=>{const g=document.createElementNS(svg.namespaceURI,'g');g.setAttribute('class','elb'+(l.opt?' opt':''));g.dataset.f=l.ef;g.dataset.t=l.et;
+    const t=document.createElementNS(svg.namespaceURI,'text');t.textContent=l.t;g.appendChild(t);svg.appendChild(g);
+    const bb=t.getBBox(); const w=bb.width+8,h=13;
+    let x=l.x-w/2,y=l.y-h/2; if(l.side){x=l.x+5;}
+    t.setAttribute('x',x+4);t.setAttribute('y',y+10);
+    const r=document.createElementNS(svg.namespaceURI,'rect');r.setAttribute('x',x);r.setAttribute('y',y);r.setAttribute('width',w);r.setAttribute('height',h);r.setAttribute('rx',3);
+    g.insertBefore(r,t); if(l.rot) g.setAttribute('transform',`rotate(-90 ${l.x} ${l.y})`);});
+}
+function pathD(p){const r=5;let d=`M${p[0][0]},${p[0][1]}`;
+  for(let i=1;i<p.length-1;i++){const [ax,ay]=p[i-1],[bx,by]=p[i],[cx,cy]=p[i+1];
+    const l1=Math.hypot(bx-ax,by-ay),l2=Math.hypot(cx-bx,cy-by); if(!l1||!l2) continue; const rr=Math.min(r,l1/2,l2/2);
+    const sx=bx-(bx-ax)/l1*rr, sy=by-(by-ay)/l1*rr, ex=bx+(cx-bx)/l2*rr, ey=by+(cy-by)/l2*rr;
+    d+=` L${sx},${sy} Q${bx},${by} ${ex},${ey}`;}
+  const e=p[p.length-1]; return d+` L${e[0]},${e[1]}`;}
+let SHOWD=false, HL=null;
+function highlight(id){HL=id; const on=!!id; svg.classList.toggle('hl',on);
+  const linked=new Set(id?[id]:[]);
+  svg.querySelectorAll('path.e').forEach(p=>{const hit=on&&(p.dataset.f===id||p.dataset.t===id); p.classList.toggle('on',hit); p.setAttribute('marker-end',hit?'url(#ahh)':'url(#ah)'); if(hit){linked.add(p.dataset.f);linked.add(p.dataset.t);}});
+  svg.querySelectorAll('g.elb').forEach(g=>g.classList.toggle('on',on&&(g.dataset.f===id||g.dataset.t===id)));
+  NODES.forEach(n=>n.el.classList.toggle('dim',on&&!linked.has(n.id)));}
+// ---------- drawer ----------
+const dr=document.getElementById('dr'); let selEl=null;
+function openDrawer(n,el){
+  const X=XL[n.c]; const steps=X.steps.filter(s=>n.refs.includes(s.id));
+  document.getElementById('dk').textContent=X.title+' · '+(badge(n)||'');
+  document.getElementById('dt').textContent=n.t;
+  const db=document.getElementById('db'); db.innerHTML='';
+  if(n.ph){const p=document.createElement('div');p.className='note';p.textContent=n.ph+' — mốc giai đoạn trong bộ quy trình, không phải một bước riêng.';db.appendChild(p);}
+  const rps=RP[n.id]||[];
+  if(rps.length){
+    const sec=document.createElement('div');sec.className='rpsec';
+    const h=document.createElement('h4');h.textContent='Báo cáo theo dõi';sec.appendChild(h);
+    rps.forEach(([k,xem,pg])=>{
+      const it=document.createElement('div');it.className='rpi';
+      const a=document.createElement('a');a.href=rpUrl(k,pg);a.target='_blank';a.rel='noopener';
+      a.textContent=REPORTS[k].ten+(pg==='matran'?' › Ma trận món':pg==='kichban'?' › Kịch bản giả lập':pg==='dutoan'?' › Dự toán 3 tháng':pg==='toancanh'?' › Toàn cảnh thực đơn':pg==='muakem'?' › Mua kèm tự nhiên':'')+' ↗';
+      const x=document.createElement('div');x.className='x';x.textContent='Xem: '+xem;
+      it.append(rk(k),a,x);sec.appendChild(it);
+    });
+    db.appendChild(sec);
+  }
+  steps.forEach(s=>{
+    const c=document.createElement('div'); c.className='step';
+    const no=CASED[n.c]?('Trường hợp '+s.id.split('.')[0]+' · Bước '+s.n):('Bước '+s.n);
+    c.innerHTML='<div class="sh"><span class="no"></span><span class="gp"></span></div><h3></h3><dl class="kv"></dl>';
+    c.querySelector('.no').textContent=no; c.querySelector('.gp').textContent=s.grp;
+    c.querySelector('h3').textContent=s.hd||'—';
+    const kv=c.querySelector('.kv');
+    [['Người làm',s.nguoi],['BP phụ trách',s.bp],['Mô tả',s.mt],['Dữ liệu thu thập',s.dl],['Ghi chú',s.gc]].forEach(([k,v])=>{
+      if(!v) return; const dt=document.createElement('dt');dt.textContent=k;const dd=document.createElement('dd');dd.textContent=v;kv.append(dt,dd);});
+    db.appendChild(c);
+  });
+  if(selEl) selEl.classList.remove('sel'); selEl=el; el.classList.add('sel');
+  dr.classList.add('on'); dr.setAttribute('aria-hidden','false'); highlight(n.id);
+}
+function closeDrawer(){highlight(null);dr.classList.remove('on');dr.setAttribute('aria-hidden','true');if(selEl){selEl.classList.remove('sel');selEl.focus();selEl=null;}}
+document.getElementById('dx').onclick=closeDrawer;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDrawer();});
+// ---------- zoom ----------
+const board=document.getElementById('board'), sc=document.getElementById('sc'); let Z=1;
+function setZ(z){Z=Math.max(.35,Math.min(1.6,z)); board.style.zoom=Z; document.getElementById('zlab').textContent=Math.round(Z*100)+'%';}
+const fitZ=()=>(sc.clientWidth-4)/(LABW+W+8);
+document.getElementById('zfit').onclick=()=>setZ(fitZ());
+document.getElementById('z100').onclick=()=>setZ(1);
+document.getElementById('tgd').onclick=(ev)=>{SHOWD=!SHOWD; const z=Z; board.style.zoom=1; drawEdges(); setZ(z); highlight(HL); const b=ev.currentTarget; b.textContent=SHOWD?'Ẩn luồng phối hợp':'Hiện luồng phối hợp'; b.setAttribute('aria-pressed',SHOWD);};
+// ---------- tab Đề xuất báo cáo ----------
+// q: giu = giữ, gon = giữ nhưng tinh gọn / chuẩn hoá, gop = gộp vào báo cáo khác
+const DX_HT=[
+  {k:'DT',q:'gon',qt:'Giữ – chuẩn hoá',ly:'Báo cáo gốc cho nhóm chỉ số doanh thu; đang trùng 14 chỉ số với Radar, 6 với Khách hàng, 8 với Sản phẩm.',
+   viec:'Làm nguồn chuẩn cho mọi chỉ số doanh thu. Thống nhất 1 công thức cho DT sau GG và Chi phí giảm giá (hiện cấp hóa đơn và cấp dòng lệch ~3,3 tỷ / 10 tháng). Bổ sung trang theo dõi cửa hàng mới (xem phần bổ sung).'},
+  {k:'SP',q:'gon',qt:'Giữ – tinh gọn',ly:'Số bán theo sản phẩm / nhóm / kênh. Phần doanh thu tổng trùng với báo cáo Doanh thu.',
+   viec:'Chỉ giữ góc nhìn sản phẩm (số bán, cơ cấu, CTKM theo sản phẩm); doanh thu tổng xem ở báo cáo Doanh thu. Về sau cân nhắc gộp cùng Menu Engineering thành 1 báo cáo Sản phẩm 2 phần: Bán hàng và Hiệu quả menu.'},
+  {k:'ME',q:'giu',qt:'Giữ',ly:'Duy nhất có giá vốn – GM, ma trận menu, kịch bản giá, dự toán bán và NVL; phủ 7 bước của mảng Đồ uống mới.',
+   viec:'Giữ làm công cụ ra quyết định cho R&D / KDVH. Chốt benchmark cơ cấu menu để bật cảnh báo trên báo cáo.'},
+  {k:'KH',q:'gon',qt:'Giữ – làm đầu mối KHTV',ly:'Chỉ số khách thành viên đang rải ở Doanh thu, Sản phẩm, Retention.',
+   viec:'Làm báo cáo chính cho khách thành viên: quy mô, giá trị, RFM. Nhận thêm phần Retention (bên dưới).'},
+  {k:'RT',q:'gop',qt:'Gộp vào Khách hàng',ly:'Cùng đối tượng khách thành viên với báo cáo Khách hàng (trùng 3 chỉ số), chỉ phủ 2 bước.',
+   viec:'Chuyển thành trang "Giữ chân khách" (cohort, tỷ lệ quay lại) trong báo cáo Khách hàng.'},
+  {k:'RD',q:'gop',qt:'Gộp vào Marketing',ly:'4/7 chỉ số (voucher phát hành, đã dùng, tỷ lệ redeem, % markdown) đã có trong Marketing; chỉ phủ 2 bước.',
+   viec:'Chuyển thành trang "Voucher / CRM" trong báo cáo Marketing.'},
+  {k:'MK',q:'gon',qt:'Giữ – thêm trang tổng kết',ly:'Bước "Theo dõi & báo cáo kết quả CTKM" đang phải mở 4 báo cáo (MK, RD, RT, KH).',
+   viec:'Thêm trang "Tổng kết chương trình": doanh thu, chi phí, ROI, tỷ lệ redeem, khách quay lại sau chương trình → 1 bước chỉ cần 1 báo cáo.'},
+  {k:'RA',q:'gon',qt:'Giữ – chỉ số tổng cho BOD',ly:'Trùng 14 chỉ số với Doanh thu, 8 với Sản phẩm.',
+   viec:'Chỉ giữ chỉ số tổng và cảnh báo cho BOD; bấm sang báo cáo chi tiết khi cần. Xác nhận phần điểm QC (BeChecklist) và đào tạo (LMS) đã có chưa.'},
+  {k:'KHO',q:'giu',qt:'Giữ',ly:'Vận hành hằng ngày ở cửa hàng (Google Sheet theo từng cửa hàng).',
+   viec:'Giữ dạng Google Sheet. Đưa vài chỉ số tổng (tồn, hao hụt, số ngày còn hàng) lên Radar để BOD theo dõi chung.'},
+  {k:'NS',q:'giu',qt:'Giữ',ly:'Xếp ca, giờ công, lương theo giờ ở cửa hàng (Google Sheet theo từng cửa hàng).',
+   viec:'Giữ dạng Google Sheet. Đưa chỉ số tổng (giờ công / doanh thu, định biên so với thực tế) lên Radar.'}
+];
+const DX_MOI=[
+  {ten:'Báo cáo CSKH & khiếu nại',u:'cao',ut:'Ưu tiên 1',buoc:['e4','e7','e8','e12','e13'],
+   cs:'Số khiếu nại theo cấp / kênh / cửa hàng / nhóm lỗi; thời gian xử lý, % xử lý đúng hạn; tỷ lệ khiếu nại lặp lại; CSAT, NPS.',
+   ng:'Phiếu khiếu nại (FB, Zalo OA, QR, Maps, hotline) – nên ghi nhận tập trung trên Base để có dữ liệu.',
+   gc:'Cả mảng Xử lý khiếu nại hiện chưa có báo cáo nào.'},
+  {ten:'Báo cáo QC / KHBM',u:'cao',ut:'Ưu tiên 1',buoc:['d1','d2','d3','d5','d7','a17','b25','c21','e6'],
+   cs:'Điểm chấm theo tiêu chí và cửa hàng, TB 2 tháng so ngưỡng 75%, lỗi lặp lại, tiến độ khắc phục trong 72h; lọc theo giai đoạn (cửa hàng mới, món mới sau 10 ngày).',
+   ng:'BeChecklist (điểm chấm QC, KHBM), biên bản khắc phục.',
+   gc:'1 báo cáo phủ được cả 3 bước "Đánh giá chất lượng" ở các mảng khác. Radar chỉ hiện điểm tổng.'},
+  {ten:'Theo dõi cửa hàng mới (90 ngày đầu)',u:'tb',ut:'Ưu tiên 2',buoc:['a1','a4','a11','a21'],
+   cs:'Doanh thu / ngày theo tuần kể từ khai trương so với cửa hàng cùng khu vực / loại mặt bằng và so với dự toán dự án; khách mới, tỷ lệ quay lại.',
+   ng:'Doanh thu POS + Dim Store (ngày mở bán, loại mặt bằng) + bảng sự kiện cửa hàng.',
+   gc:'Có thể làm thành 1 trang trong báo cáo Doanh thu thay vì báo cáo mới.'},
+  {ten:'Đào tạo nhân sự',u:'tb',ut:'Ưu tiên 2',buoc:['a15','b12','b20','c16'],
+   cs:'Tỷ lệ hoàn thành, điểm kiểm tra theo khoá / cửa hàng / vị trí; nhân sự chưa đạt trước ngày mở bán.',
+   ng:'LMS.',
+   gc:'Nếu Radar đã có phần LMS thì chỉ cần thêm trang chi tiết; nếu chưa thì bổ sung.'},
+  {ten:'Thử nghiệm & ý kiến khách hàng món mới',u:'thap',ut:'Ưu tiên 3',buoc:['b4','b13'],
+   cs:'Điểm thử nếm qua các lần, điểm khảo sát khách theo tiêu chí (vị, giá, trình bày), tỷ lệ muốn mua lại.',
+   ng:'Form khảo sát thử nếm / thử nghiệm tại cửa hàng.',
+   gc:'Giúp quyết định món có ra mắt hay không trước khi vào ma trận menu.'},
+  {ten:'Triển khai CTKM tại cửa hàng',u:'thap',ut:'Ưu tiên 3',buoc:['f10','f11'],
+   cs:'% cửa hàng xác nhận đã triển khai, lỗi POS / POSM / app giao hàng theo chương trình.',
+   ng:'Xác nhận của cửa hàng trên Base (mail / form).',
+   gc:'Có thể theo dõi bằng quy trình Base, không nhất thiết làm báo cáo riêng.'},
+  {ten:'Thưởng cửa hàng',u:'thap',ut:'Ưu tiên 3',buoc:['b27','c22'],
+   cs:'Thưởng theo chương trình / cửa hàng so với kết quả bán.',
+   ng:'Dữ liệu kế toán.',gc:'Làm khi có nhu cầu đối soát thưởng thường xuyên.'}
+];
+function xemTrenSoDo(ids){
+  chonTab('sodo'); RSEL.clear(); COV=false; document.getElementById('rpcov').setAttribute('aria-pressed','false'); apply();
+  const set=new Set(ids); NODES.forEach(n=>{n.el.classList.toggle('rdim',!set.has(n.id)); n.el.classList.toggle('rhit',set.has(n.id));});
+  document.getElementById('rpclr').style.display='';
+  const f=byId[ids[0]]; if(f){ sc.scrollTo({left:Math.max(0,(f.x-200)*Z), top:Math.max(0,(f.y-120)*Z), behavior:'smooth'}); }
+}
+function chonTab(t){
+  document.body.classList.toggle('dx',t==='dx');
+  document.getElementById('tab-sodo').setAttribute('aria-selected',String(t!=='dx'));
+  document.getElementById('tab-dx').setAttribute('aria-selected',String(t==='dx'));
+  if(t==='dx') closeDrawer();
+}
+(function(){
+  const v=document.getElementById('dxv'), esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const tenBuoc=ids=>ids.map(i=>byId[i]?byId[i].t:i).join(' · ');
+  let h='<h2>1. Báo cáo hiện tại – giữ, tinh gọn hay gộp</h2><p class="lead">Xét trên 10 báo cáo đang gắn vào sơ đồ: số bước nghiệp vụ dùng tới, mức trùng chỉ số với báo cáo khác (sheet "Tổng hợp chỉ số") và vai trò của báo cáo. Sau khi gộp còn 8 báo cáo.</p><div class="dxg">';
+  DX_HT.forEach(d=>{
+    const ids=Object.keys(RP).filter(i=>RP[i].some(r=>r[0]===d.k));
+    h+='<div class="dxc"><div class="hd"><span class="rk" style="background:'+REPORTS[d.k].mau+'">'+d.k+'</span>'+esc(REPORTS[d.k].ten)+'<span class="tag '+d.q+'">'+esc(d.qt)+'</span></div>'+
+       '<dl><dt>Đang phủ</dt><dd>'+ids.length+' bước</dd><dt>Lý do</dt><dd>'+esc(d.ly)+'</dd><dt>Việc cần làm</dt><dd>'+esc(d.viec)+'</dd></dl>'+
+       (ids.length?'<button type="button" class="go" data-ids="'+ids.join(',')+'">Xem trên sơ đồ →</button>':'')+'</div>';
+  });
+  h+='</div><p class="dxnote">Trùng chỉ số tính từ sheet "Tổng hợp chỉ số" (CCP x Base 2026 Projects), cần đối chiếu lại với báo cáo thật. Trước khi gộp / bỏ nên xem thêm Usage metrics trên Power BI (số lượt mở từng báo cáo).</p>';
+  h+='<h2>2. Báo cáo cần bổ sung</h2><p class="lead">Lấp các bước nghiệp vụ chưa có báo cáo (đầu ra / kết quả, điểm quyết định theo số liệu). Ưu tiên 1 phủ được nhiều bước nhất và đã có nguồn dữ liệu.</p><div class="dxg">';
+  DX_MOI.forEach(d=>{
+    const ids=d.buoc.filter(i=>byId[i]);
+    h+='<div class="dxc"><div class="hd">'+esc(d.ten)+'<span class="tag '+d.u+'">'+esc(d.ut)+'</span></div>'+
+       '<dl><dt>Phủ bước</dt><dd>'+ids.length+' bước: '+esc(tenBuoc(ids))+'</dd><dt>Chỉ số chính</dt><dd>'+esc(d.cs)+'</dd><dt>Nguồn</dt><dd>'+esc(d.ng)+'</dd><dt>Ghi chú</dt><dd>'+esc(d.gc)+'</dd></dl>'+
+       '<button type="button" class="go" data-ids="'+ids.join(',')+'">Xem trên sơ đồ →</button></div>';
+  });
+  h+='</div><p class="dxnote">Sau khi gộp và bổ sung: 8 báo cáo hiện tại + 2 báo cáo mới ưu tiên 1 (CSKH, QC/KHBM) phủ toàn bộ 6 mảng nghiệp vụ; các mục ưu tiên 2–3 có thể làm thành trang trong báo cáo sẵn có.</p>';
+  v.innerHTML=h;
+  v.addEventListener('click',e=>{const b=e.target.closest('.go'); if(b) xemTrenSoDo(b.dataset.ids.split(','));});
+  document.getElementById('tab-sodo').onclick=()=>chonTab('sodo');
+  document.getElementById('tab-dx').onclick=()=>chonTab('dx');
+})();
+// ---------- kéo màn hình: giữ chuột trái vào chỗ trống rồi kéo ----------
+(function(){
+  let keo=null;
+  sc.addEventListener('mousedown',e=>{
+    if(e.button!==0||e.target.closest('.node,button,a')) return;   // bấm vào ô / nút thì giữ hành vi cũ
+    keo={x:e.clientX,y:e.clientY,l:sc.scrollLeft,t:sc.scrollTop,moved:false};
+    sc.classList.add('keo'); e.preventDefault();
+  });
+  window.addEventListener('mousemove',e=>{
+    if(!keo) return;
+    const dx=e.clientX-keo.x, dy=e.clientY-keo.y;
+    if(Math.abs(dx)+Math.abs(dy)>3) keo.moved=true;
+    sc.scrollLeft=keo.l-dx; sc.scrollTop=keo.t-dy;
+  });
+  window.addEventListener('mouseup',()=>{ if(keo){sc.classList.remove('keo'); keo=null;} });
+})();
+document.getElementById('zin').onclick=()=>setZ(Z+.1);
+document.getElementById('zout').onclick=()=>setZ(Z-.1);
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>{
+  board.style.zoom=1; drawEdges(); setZ(Math.max(.6,Math.min(1,fitZ())));
+});
+</script>
+</body>
+</html>
